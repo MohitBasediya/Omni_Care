@@ -1,0 +1,54 @@
+#login-form,#forgot-password{
+   max-width: 500px;
+   padding: 10px;
+   border: none;
+}
+ #login-form .webcolor{
+    color: white;
+    cursor: pointer;
+    text-decoration: none;
+ }  
+ .icon {
+    font-size: 1.2rem;
+  }  
+   #login-form .btn {
+    display: block!important;
+    margin: auto;
+    font-weight: 400;
+    background-color: black;
+    color: white;
+    border-radius: 5px;
+    border: none!important;
+    padding: 0.5em 2em;
+  }
+  
+  .myform .btn:hover {
+    background-color: inherit;
+    color: #FF0057;
+    border-color: #FF0057;
+  }  
+  .input-field {
+    background: transparent!important;
+    color: black;
+    border: none!important;
+  }  
+  .input-field:focus {
+    color: white;
+    box-shadow: none;
+  }  
+  #otpfield {
+    display: none;
+  }  
+  #signupbutton {
+    visibility: hidden;
+  }  
+  .registerformimage {
+    margin-top: 30%;
+  }  
+  .btn-close {
+    color: black!important;
+    background: transparent!important;
+  }  
+  .registrationimage {
+    margin-top: 20%;
+  }

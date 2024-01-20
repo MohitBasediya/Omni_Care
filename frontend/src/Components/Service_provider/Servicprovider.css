@@ -1,0 +1,435 @@
+:root {
+    /* =====>>  Font Color  <<===== */
+    --f1-color: #fff;
+    --f2-color: #000;
+    --f3-color: rgba(0, 0, 0, 0.8);
+    --f4-color: rgba(0, 0, 0, 0.6);
+    --f5-color: #0099cc;
+    --f6-color: #88cee6;
+  
+    /* =====>>  Background Color  <<===== */
+    --bg1-color: #fff;
+    --bg2-color: #000;
+    --bg3-color: #33ccff;
+    --bg4-color: #33cc33;
+    --bg5-color: #0099cc;
+    --bg6-color: rgba(0, 0, 0, 0.4);
+    --bg7-color: rgba(0, 0, 0, 0.2);
+    --glass-bg: linear-gradient(
+      to right bottom,
+      rgba(255, 255, 255, 0.5),
+      rgba(255, 255, 255, 0.3)
+    );
+    --C-lg-bg: linear-gradient(45deg, #ff3399, #ff9933);
+  
+    /* ===== =====>>  Font Size  <<===== =====  */
+    --xxxl-fs: 2.2rem;
+    --xxl-fs: 1.8rem;
+    --xl-fs: 1.6rem;
+    --l-fs: 1.4rem;
+    --m-fs: 1.2rem;
+    --s-fs: 1.1rem;
+    --xs-fs: 1rem;
+  
+    /* =====>>  Margin  <<===== */
+    --m-2-5: 2.5rem;
+    --m-1-8: 1.8rem;
+    --m-1-5: 1.5rem;
+    --m-0-6: 0.6rem;
+    --m-0-5: 0.5rem;
+    --m-0-3: 0.3rem;
+  
+    /* =====>>  Padding  <<===== */
+    --p-2-5: 2.5rem;
+    --p-1-5: 1.5rem;
+    --p-1-0: 1rem;
+    --p-0-8: 0.8rem;
+    --p-0-5: 0.5rem;
+    --p-0-4: 0.4rem;
+    --p-0-3: 0.3rem;
+  }
+  
+  /* ===== =====>>  Main-Container Css  <<===== =====  */
+   .container1 {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    grid-template-areas:"header header"
+      "userProfile userDetails"
+      "work_skills timeline_about"
+      "work_skills timeline_about";
+    width: 100%;
+    height: 105vh;
+    background: var(--glass-bg);
+    padding: var(--p-1-5);
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.5), 0 0 25px rgba(0, 0, 0, 0.08);
+  } 
+  
+  /* ===== =====>>  Container Cards Grid-Area Css Start  <<===== =====  */
+  header {
+    grid-area: header;
+  }
+  
+  .userProfile {
+    grid-area: userProfile;
+  }
+  
+  .userDetails {
+    grid-area: userDetails;
+    border-style: none;
+  }
+  
+  .timeline_about {
+    grid-area: timeline_about;
+    border-style: none;
+  }
+  
+  /* ===== =====>>  Container Cards Css  <<===== =====  */
+  .container1 .card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(3rem);
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.05);
+    padding: var(--p-1-5);
+  }
+  
+  /* ===== =====>>  Container Header/Navbar Css  <<===== =====  */
+  .container1 header {
+    padding: 0 var(--p-2-5);
+  }
+  
+  .container1 header .brandLogo {
+    display: flex;
+    align-items: center;
+  }
+  
+  .container1 header .brandLogo figure img {
+    width: 3.5rem;
+    height: 3.5rem;
+  }
+  
+  .container1 header .brandLogo span {
+    font-size: var(--xl-fs);
+    font-weight: 700;
+    /* margin-left: var(--m-0-5); */
+  }
+  
+  /* ===== =====>>  User Main-Profile Css Start  <<===== ===== */
+  .container1 .userProfile {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    background: none;
+    backdrop-filter: none;
+    box-shadow: none;
+    border-style: none;
+  }  
+  .container1 .userProfile .profile figure img {
+    width: 18rem;
+    height: 18rem;
+    border-radius: 50%;
+    margin-top: 2rem;
+    margin-left: -2rem;
+  }  
+  .userDetails {
+    position: relative;
+    padding: var(--p-1-5) var(--p-2-5);
+  }  
+  .userDetails .userName h1 {
+    font-size: var(--xxxl-fs);
+  }
+  .userDetails .userName .map {
+    position: absolute;
+    top: 2.5rem;
+    left: 18.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .userDetails .userName .map .ri {
+    margin-right: var(--m-0-3);
+    font-size: var(--m-fs);
+  }
+  .userDetails .userName .map span {
+    font-size: var(--s-fs);
+    color: var(--f3-color);
+    font-weight: 700;
+  }  
+  .userDetails .userName p {
+    font-size: var(--m-fs);
+    font-weight: 700;
+    color: var(--f5-color);
+    margin-bottom: var(--m-1-8);
+  }  
+  .userDetails .rank {
+    position: relative;
+    margin-bottom: var(--m-1-8);
+  }  
+  .userDetails .rank .heading {
+    font-size: var(--xs-fs);
+    color: var(--f4-color);
+    text-transform: uppercase;
+    margin-bottom: var(--m-0-6);
+  }  
+  .userDetails .rank span {
+    font-size: var(--xxl-fs);
+    font-weight: 700;
+  }  
+  .userDetails .rank .rating {
+    position: absolute;
+    top: 2.7rem;
+    left: 3.5rem;
+  }  
+  .userDetails .rank .rating .rate {
+    color: var(--f5-color);
+    font-size: var(--l-fs);
+  }  
+  .userDetails .rank .rating .underrate {
+    color: var(--f6-color);
+  }
+  
+  .userDetails .btns ul,
+  .userDetails .btns ul li {
+    display: flex;
+    align-items: center;
+  }
+  
+  .userDetails .btns ul li {
+    margin-right: var(--m-2-5);
+    
+  }
+  
+  .userDetails .btns ul li .ri {
+    margin-right: var(--m-0-5);
+    font-size: var(--xl-fs);
+  }
+  
+  .userDetails .btns ul li a {
+    font-size: var(--l-fs);
+    color: var(--f2-color);
+    font-weight: 500;
+  }
+  
+  .userDetails .btns ul .active {
+    background: #e6f2ff;
+    padding: var(--p-0-5) var(--p-1-5);
+  }
+  
+  .userDetails .btns ul .active a,
+  .userDetails .btns ul .active .ri {
+    color: var(--f5-color);
+  }  
+  /* ===== =====>>  Timeline & About Css Start  <<===== ===== */
+  .timeline_about {
+    padding: var(--p-2-5);
+  }  
+  .timeline_about .tabs ul {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-bottom: var(--m-2-5);
+  }  
+  .timeline_about .tabs ul::before {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 100%;
+    height: 1px;
+    background: var(--bg7-color);
+  }  
+  .timeline_about .tabs ul li {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-right: var(--m-2-5);
+    padding-bottom: var(--p-0-8);
+    cursor: pointer;
+  }  
+  .timeline_about .tabs ul li span {
+    font-size: var(--l-fs);
+    font-weight: 500;
+  }  
+  .timeline_about .tabs ul li .ri {
+    margin-right: var(--m-0-5);
+  }  
+  .timeline_about .tabs ul .active::before {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--bg5-color);
+  }  
+  .timeline_about .contact_info .heading,
+  .timeline_about .basic_info .heading {
+    font-size: var(--xs-fs);
+    color: var(--f4-color);
+    text-transform: uppercase;
+    margin-bottom: var(--m-1-5);
+  }  
+  .timeline_about .contact_info ul,
+  .timeline_about .basic_info ul {
+    margin-bottom: var(--m-1-5);
+  }  
+  .timeline_about .contact_info ul li,
+  .timeline_about .basic_info ul li {
+    display: flex;
+    margin: var(--m-0-5) 0;
+  }  
+  .timeline_about .contact_info ul li h1,
+  .timeline_about .basic_info ul li h1 {
+    font-weight: 500;
+    font-size: var(--m-fs);
+    min-width: 12rem;
+  }  
+  .timeline_about .contact_info ul li span,
+  .timeline_about .basic_info ul li span {
+    font-size: var(--m-fs);
+  }  
+  .timeline_about .contact_info ul .phone span,
+  .timeline_about .contact_info ul .email span,
+  .timeline_about .contact_info ul .site span {
+    color: var(--f5-color);
+  }
+  
+  /* ================================================================== */
+  .shadow {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
+  }  
+  .profile-tab-nav {
+    max-width: 250px;
+    margin-bottom: 2rem;
+  }  
+  .tab-content {
+    flex: 1;
+  }  
+  .form-group {
+    margin-bottom: 1.5rem;
+  }  
+  .nav-pills a.nav-link {
+    padding: 15px 20px;
+    border-bottom: 1px solid #ddd;
+    border-radius: 0;
+    color: #333;
+  }
+  
+  @media screen and (max-width: 1024px) {
+      a {
+        font-size: 16px;
+      }
+    }
+        
+    @media screen and (max-width: 768px) {
+      .container1 {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+          "header"
+          "userProfile"
+          "userDetails"
+          "work_skills"
+          "timeline_about";
+        overflow-x: hidden;
+        overflow-y: inherit;
+        padding: 0;
+        box-shadow: none;
+      }    
+      /* ===== =====>>  Container Card Css Start  <<===== ===== */
+      .container1 .card {
+        backdrop-filter: none;
+      }
+      .userDetails {
+        margin-bottom: 3rem;
+      }    
+      .container1::before,
+      .container1::after {
+        display: none;
+      }
+    
+      /* ===== =====>>  Header/Navbar Css Start  <<===== ===== */
+      .container1 header {
+        padding: 2.5rem;
+      } 
+    }
+    
+    @media screen and (max-width: 500px) {
+      .container1 {
+        width: 100%;
+        overflow: initial;
+      }
+    }
+    
+    @media screen and (max-width: 350px) {
+      .main_bg {
+        animation: none;
+      }
+    }
+  .servicehtag{
+    font-size: 18px;
+    font-weight: 500;
+    color: rgb(69, 69, 220);
+    margin-bottom: 3rem;
+    margin-left: 2rem;
+  }
+  .servicepara{
+    font-size: 16px;
+    font-weight: 300;
+    margin-bottom: 2rem;
+  }
+  #overviewcolor{
+    background-color: #FFC737 !important;
+  }
+  #overviewimg{
+      height: 18rem;
+      width: 18rem;
+      border-radius: 50%;
+      margin: 5rem 0rem 2rem 8rem;
+  }  
+  #overviewdiv{
+      height: 410px;
+      margin-top: 5rem;
+  }
+  
+  #overviewlink{
+      text-decoration: none;
+      color: black;
+      display: block;
+      margin: 4rem 0rem 2rem 5rem;
+      font-size: 18px;
+      font-weight: 400;
+  }
+  #imgsize{
+      height: 100%;
+      width: 300px;
+      margin-left: 10px;
+  }
+  #imgrequest{
+      padding: 2%;
+      height: 100%;
+      width: 100%;
+  }
+  #button{
+      display:inline-block;
+      margin: 0px;
+      margin-left: 40px;
+      border-radius: 10px;
+      height: 3rem;
+      width: 8rem;
+      background-color:crimson;
+  }
+  #button1{
+      display:inline-block;
+      margin: 0px;
+      margin-left: 40px;
+      border-radius: 10px;
+      height: 3rem;
+      width: 8rem;
+      background-color:rgb(83, 83, 237);
+  }
+  #nextdiv{
+      padding: 2%;
+      display:block;
+      margin-bottom: 2%;
+  }
+  

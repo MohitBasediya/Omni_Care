@@ -1,0 +1,151 @@
+body {
+  background-color: whitesmoke;
+}
+#updatemodel{
+  max-width: 600px;
+  padding: 10px;
+  background: white;
+  border:none!important;
+  border-radius: 15px;
+}
+.userProfile {
+  display: flex;
+  justify-content: left;
+  align-items: left;
+  padding: 0;
+  background: none;
+  box-shadow: none;
+  border-style: none;
+}  
+/* .offcanvas{
+  height: 500px!important;
+} */
+.userProfile .profile figure img {
+  width: 5rem;
+  height: 5rem;
+  margin-left: 20px;
+}
+.shadow {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
+}
+.form-group {
+  margin-bottom: 1.5rem;
+}
+.work_skills{
+  width: 100%;
+  padding: 10px 0;
+  margin-top: 6px;
+  background-color: white;
+}
+.nav-pills{
+  list-style: none;
+}
+.nav-pills li{
+  padding: 5px 0;
+  margin-left: -30px;
+  padding: 10px;
+}
+.nav-pills li a.nav-link {
+  border-bottom: 1px solid #ddd;
+  border-radius: 12px;
+  color: #000;
+  cursor: pointer;
+  text-align: center;
+  font-size: 18px;
+  padding: 10px;
+}
+.btn-close{
+  color: white!important;
+}
+.text-reset{
+  color: white!important;
+}
+.nav-pills li a.nav-link.active {
+  background-color: #FFC737 !important;
+  color: #000;
+  font-size: 18px;
+}
+#nav-btn{
+  width: 80%;
+  padding: 10px;
+  border-radius: 10px;
+  background-color: #FFC737 !important;
+  border: none;
+  display: block;
+  margin: auto;
+}
+#customerdetails,#servicediv{
+  background-color: white;
+  height: auto;
+  width: auto;
+  margin-top: 2rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
+}
+#accountdetails{
+  margin-left: 20px;
+  margin-top: 2rem;
+}
+#line{
+  width: 100%;
+  margin-left: 1rem;
+  margin-top: -0.3rem;
+  margin-bottom: 2rem;
+  height: 1.5px; /* Adjust the height to make it thicker */
+  background-color: black; /* Change the color if needed */
+  border: none; /* Remove the default border */
+}
+#currentservices{
+  background-color: white;
+  height: 28rem;
+  width: auto;
+  margin-top: 2rem;
+  border-radius: 5px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
+}
+#crtbtn{
+  margin: 1rem 1rem 1rem 1rem;
+  background-color: #000;
+  color: #ddd;
+  border: none;
+  border-radius: 5px;
+  width: 9rem;
+  height: 3rem;
+  margin: 3rem 2rem 2rem 2rem;
+  padding : 0.5rem;
+}
+#profilename{
+  color: black(116, 116, 241);
+  font-weight: 500;
+  font-size: 20px;
+  margin: 2rem 2rem 2rem 2rem;
+  text-decoration: none;
+}
+#serviceimg{
+  height: 4rem;
+  width: 4rem;
+  margin-left: 1rem;
+  margin-bottom: 2rem;
+  border-radius: 50%;
+}
+#servicename{
+  font-size: 14px;
+  font-weight: 500;
+}
+#servicename1{
+  font-size: 14px;
+  margin-top: -16px;
+}
+#profilenames{
+  font-size: 18px;
+  margin-left: 2rem;
+  margin-bottom: 2rem;
+  font-weight: 500;
+  color: rgb(87, 87, 233);
+}
+@media screen and (max-width:767px){  
+  .nav-pills li{
+    display: inline;
+    margin-left: 10px;
+    margin-right: 10px;
+  }
+}

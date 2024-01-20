@@ -1,0 +1,74 @@
+#service_provider{
+    width: 100%;
+    height: 35vh;
+    background: url('../../images/electrician.jpg');
+    position: relative;
+}
+#service_provider::before{
+    position: absolute;
+    content: '';
+    width: 100%;
+    height: 100%;    
+    top: 0;
+    left: 0;
+    background: rgba(0, 0, 0, 0.8);
+}
+#services_card{
+    width: 100%;
+    height: auto;
+    background: #F9F5F4;
+}
+#services_card .container .row .col-md-9 .container .row .col-md-4 .card .card-img-top{
+    height: 140px!important;
+}
+#services_card .container .row .col-md-9 .container .row .col-md-4 .card .card-body h5{
+    font-size: 14px;
+}
+.pagination-outer{ text-align: center; }
+.pagination{
+    font-family: 'Poppins', sans-serif;
+    display: inline-flex;
+    position: relative;
+}
+.pagination li button.page-link{
+    color: #111;
+    background: #eee;
+    font-size: 17px;
+    font-weight: 600;
+    text-align: center;
+    line-height: 33px;
+    height: 33px;
+    width: 33px;
+    padding: 0;
+    margin: 0 10px;
+    border: none;
+    border-radius: 0;
+    display: block;
+    position: relative;
+    z-index: 0;
+    transition: all 0.4s ease 0s;
+}
+.pagination li:first-child button.page-link,
+.pagination li:last-child button.page-link{
+    font-size: 23px;
+    line-height: 31px;
+}
+.pagination li button.page-link:hover,
+.pagination li button.page-link:focus,
+.pagination li.active button.page-link:hover,
+.pagination li.active button.page-link{
+    color: #111;
+    background: #fff;
+    box-shadow: 4px 0 rgba(0, 0, 0, 0.1),-4px 0 rgba(0, 0, 0, 0.1), 0 4px rgba(0, 0, 0, 0.1), 0 -4px rgba(0, 0, 0, 0.1);
+}
+@media only screen and (max-width: 480px){
+    .pagination{
+        font-size: 0;
+        display: inline-block;
+    }
+    .pagination li{
+        display: inline-block;
+        vertical-align: top;
+        margin: 0 0 15px;
+    }
+}

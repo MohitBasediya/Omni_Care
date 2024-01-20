@@ -1,0 +1,93 @@
+.maindiv{
+    width: 100%;
+    padding: 20px;
+    border-radius: 12px;
+}
+.h1{
+    font-size: 4vh;
+    font-weight: 800;
+}
+h1{
+    font-size: 3vh;
+    margin-top: 3vh;
+    font-weight: 800;
+}
+.fxt-btn-fill{
+    border-radius: 1vh;
+    background-color: black;
+    color: white;
+    padding: 10px;
+    width:25vh;
+}
+.image{   
+    height: 100%;
+    width: 100%; /* Ensure the image takes the full width of the container */
+    animation: zoomIn 15s infinite;
+}
+
+.button_div{
+  position: absolute;
+  top: 50%; 
+  left: 93%;
+  transform: translate(-50%, -50%); 
+  text-align: center; 
+}
+.fxt-btn{
+   margin-bottom: 10px;
+   width: 17vh;
+   padding: 10px 20px;
+   border-radius: 5vh 0 0 5vh;
+   background-color: white;
+   color: black;
+   border: none;     
+   
+}
+.accordion-button:active{
+    background: white!important;
+    box-shadow: none!important;
+    color: black!important;
+}
+
+.image-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden; /* Hide the overflow to prevent the image from affecting the layout */
+}
+  
+  @keyframes zoomIn {
+    0% {
+        transform: scale(1); 
+    }
+    50%{
+      transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1); 
+    }
+}
+/* @media screen and (max-width:775px){
+  .button_div{
+    display: flex;
+    bottom: -25%;
+    left: 50%;
+    justify-content: center;
+    align-items: center;
+    transform: translateX(-50%);
+  }
+  .fxt-btn{
+    margin: 0 10px;
+    width: 14vw;
+    font-size: 15px;
+  }
+} */
+#exampleModal{
+  max-width: 1000px;  
+  border-radius: 12px;
+}
+#exampleModal .modal1{
+  width: 100%;
+  padding: 10px;
+  border-radius: 12px;
+  background-color: #FFC36A;
+}
