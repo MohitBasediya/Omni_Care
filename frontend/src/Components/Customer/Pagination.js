@@ -7,7 +7,7 @@ function Pagination({totalPosts,postPerPage,currentPage,setCurrentPage}){
     return(
         <>
             <nav className='pagination-outer'>
-                <ul className="pagination pagination-lg">
+                <ul className="pagination pagination-lg ">
                     {
                         page.map((pg,index)=>{
                             return(

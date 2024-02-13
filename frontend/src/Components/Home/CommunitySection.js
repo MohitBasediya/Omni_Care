@@ -9,7 +9,7 @@ export default function CommunitySection() {
             <div className='row text-light'>
                 <div className='handclass col-lg-4 p-5 ms-2 flex-column position-relative'>
                     <div className='w-auto'>
-                        <h2 className='waysH2 ms-4'>We <span className="highlight-text">BUILD</span><br /> Community<br /></h2>
+                        <h2 className='waysH2 ms-4 text-light'>We <span className="highlight-text">BUILD</span><br /> Community<br /></h2>
                         <img src={HandFold} alt="" className="community-hands-image" />
                     </div>
                     <div className='mt-5' style={{paddingTop:'30px'}}>
@@ -17,7 +17,7 @@ export default function CommunitySection() {
                     </div>
                 </div>
                 <div className='col-lg-7 col-md-12 communityBack ms-4'>
-                    <h2>Empowering Service Providers: Your Skills, Your Opportunities <big>-</big><br />All at Your Fingertips</h2>
+                    <h2 className='text-light'>Empowering Service Providers: Your Skills, Your Opportunities <big>-</big><br />All at Your Fingertips</h2>
                     <a href="/visit-vous" className="large-link w-inline-block py-2">
                         <div className="link-text-block">Unlock Opportunities</div>
                         <div className="link-arrow-wrapper" style={{ transform: "translate3d(0px, 0px, 0px) scale3d(1, 1, 1) rotateX(0deg) rotateY(0deg) rotateZ(0deg) skew(0deg, 0deg)", transformStyle: "preserve-3d" }}>

@@ -39,8 +39,6 @@ function Order() {
                                     <td>Larry</td>
                                     <td>indore</td>
                                     <td><button type="button" class="btn btn-danger w-100">Panding</button></td>
-
-
                                 </tr>
                                 <tr>
                                     <td>3</td>

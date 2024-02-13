@@ -7,14 +7,19 @@ import { requestedURLForServiceProvider } from '../../urls.js'
 import state_arr from './City_State_Array.js';
 import s_a from './City_State_Array.js';
 import axios from "axios";
+import { userData } from "../../store/userSlice.js";
+import { useDispatch } from "react-redux";
+import Cookie from 'js-cookie';
+import ServiceProvider_Modal from './ServiceProvider_Modal.js';
+const formData = new FormData();
 
 var OId = '';
-
+var data;
 function Agency_registration() {
-
+     
     const navigate = useNavigate();
     const location = useLocation();
-
+    const dispatch = useDispatch();
     const [Address, setAddress] = useState(false);
     const [State, setStatee] = useState(false);
     const [City, setCity] = useState(false);
@@ -26,6 +31,7 @@ function Agency_registration() {
     const [providerData, setProviderData] = useState({});
     const [localModal, setlocalModal] = useState('local');
     const [isModal, setIsModal] = useState(false);
+    const [isModal1, setIsModal1] = useState(false);
     const [AgencyId,setAgencyId] = useState(); 
     const [LocalData, setLocalData] = useState({
     localonebhk1: '',
@@ -92,7 +98,7 @@ const [StateData, setStateData] = useState({
     statecmplt2 : '',
     statecmplt3 : '',
 });
-
+    
     const setModal = (value) => {
         if (value == 'local') {
             setlocalModal(value);
@@ -171,6 +177,7 @@ const [StateData, setStateData] = useState({
     }
 
     const handleInput = (e) => {
+        console.log('provider Data ',providerData);
         if (e.target.type === 'file') {
             const file = e.target.files[0];
             const name = e.target.name;
@@ -239,7 +246,7 @@ const [StateData, setStateData] = useState({
                 }
                 else if (reg.test(value)) {
                     document.getElementById('agencyname').style.color = 'black';
-                    document.getElementById('agencyName').innerHTML = '';
+                    document.getElementById('agencyName').innerHTML= '';
                     setAgencyName(true);
                 }
                 else {
@@ -338,45 +345,36 @@ const [StateData, setStateData] = useState({
             }
                 break;
         }
-    }
-
-    
+    }    
     const submitData = async (e) => {
         e.preventDefault();
         console.log("==>", Address, " ", State, " ", City, " ", AgencyName, " ", OwnerName, " ", AgencyContact, " ", GSTNumber, " ", AgencyDetails);
         if (Address && State && City && AgencyName && OwnerName && AgencyContact && GSTNumber && AgencyDetails) {
-            const formData = new FormData();
-            console.log("providerData : ", providerData);
-            for (const index in providerData) {
-                console.log("providerData[index] : ", providerData[index], ' index : ======>', index);
-                if (providerData[index]) {
-                    console.log("in if condition ");
-                    formData.append(index, providerData[index]);
-                }
-            }
-            console.log("formData : ", formData);
-            try {
-                var result = await axios.post(requestedURLForServiceProvider + '/providerdata', formData);
-                console.log("Result : ", result);
-                if (result.status == 201) {
-                    Swal.fire("Data Added");
-                    setIsModal(true);
-                    console.log("provider data : ", result);
-                    console.log("Agency Orignal_Id : ",result.data.providerData._id);
-                    setAgencyId(result.data.providerData._id);
-                    console.log("location.state.id : ", location.state.id);
-                    
-                }
-                else if (result.status == 500) {
-                    Swal.fire('Error when add data');
-                }
-            } catch (err) {
-                console.error('Error submitting data:', err);
-            }
+            setIsModal1(true);            
         } else {
             console.log('Some fields are empty');
         }
     };
+
+    const submitData2=async()=>{
+          try {
+               
+               var result = await axios.post(requestedURLForServiceProvider + '/providerdata');
+                console.log("Result : ",result);
+                    if (result.status === 201) {
+                        Swal.fire("Data Added");
+                        setIsModal(true);
+                        setAgencyId(result.data.data[0]._id);
+                        Cookie.set("Login_Jwt_token",result.data.token);
+                        data=[...result.data.data];
+                    }
+                    else if (result.status == 500) {
+                        Swal.fire('Error when add data');
+                    }
+            } catch (err) {
+                console.error('Error submitting data:', err);
+            }
+    }
 
     const submitModalData = async (e)=>{
         e.preventDefault();
@@ -392,6 +390,8 @@ const [StateData, setStateData] = useState({
         if(result.status == 201){
             Swal.fire("Data Added");
             console.log("In If Condition Result : ",result);
+            console.log('data ',data);
+            dispatch(userData(data));
             if(result.data.agencydata.service_provider_id == AgencyId){
                 navigate('/Service_provider_profile');
             }
@@ -430,14 +430,25 @@ const [StateData, setStateData] = useState({
         handleInput(e);
     }
 
-    useEffect(() => {
-        const timeoutId = setTimeout(() => {
-            print_state();
-            setProviderData({ ...providerData, ['User_id']: location.state.id, ['Service_type']: 'Shifting Service' });
-        }, 1000);
-        return () => clearTimeout(timeoutId);
-    }, []);
-
+    useEffect(()=>{
+		if(!location.search){
+			const timeoutId = setTimeout(() => {
+				print_state();
+				setProviderData({...providerData,['User_id']:location.state.id,['Service_type']:'Shifting Agency',['pathname']:location.pathname});
+			}, 1000);
+			return () => clearTimeout(timeoutId);
+		}else{
+			const params = new URLSearchParams(location.search);
+			const status = params.get('status');
+			if(status==='true'){
+                console.log("providerdata : ",providerData);
+				console.log("formdata : ",formData);
+                submitData2();
+			}else{
+				Swal.fire("Payment unsuccessful");
+			}
+		}
+	},[]);
 
     return (<>
         <section className="" style={{ background: "#F9F5F4", padding: '72px 0 0 0' }}>
@@ -502,7 +513,7 @@ const [StateData, setStateData] = useState({
                                         <span id='gstNo'></span>
                                     </div>
                                     <div >
-                                        <input type="file" className="form-control mb-3" name="AgencyImg" id='agencyimg' placeholder="Upload Image" onChange={(e) => { handleInput(e) }} />
+                                        <input type="file" className="form-control mb-3" name="AgencyImg" id='agencyimg' placeholder="Upload Agency Image" onChange={(e) => { handleInput(e) }} />
                                         <i class="flaticon-envelope"></i>
                                     </div>
                                     <div>
@@ -514,7 +525,9 @@ const [StateData, setStateData] = useState({
 
                                 <div className="form-group">
                                     <div className="fxt-content-between d-flex justify-content-end">
-                                        <button type="submit" className="fxt-btn-fill">Click for add services</button>
+                                        <button type="submit" className="fxt-btn-fill" onClick={()=>{
+
+                                        }}>Click for add services</button>
                                     </div>
                                 </div>
                             </form>
@@ -522,6 +535,11 @@ const [StateData, setStateData] = useState({
                     </div>
                 </div>
             </div>
+            {
+				(isModal1)?
+                    <ServiceProvider_Modal providerdata={providerData} />
+				:''
+			}
         </section>
 
        {/* Modal code write here */}

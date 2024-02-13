@@ -10,7 +10,7 @@ var serviceSchema = new mongoose.Schema({
             type: String,
         },
         ServicePrice: {
-            type: String,
+            type: Number,
         },
         ServiceDesc: {
             type: String,
@@ -27,7 +27,7 @@ var serviceSchema = new mongoose.Schema({
             type: String,
         },
         ServicePrice: {
-            type: String,
+            type: Number,
         },
         ServiceDesc: {
             type: String,
@@ -44,7 +44,7 @@ var serviceSchema = new mongoose.Schema({
             type: String,
         },
         ServicePrice: {
-            type: String,
+            type: Number,
         },
         ServiceDesc: {
             type: String,

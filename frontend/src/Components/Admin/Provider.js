@@ -1,86 +1,90 @@
 import Table from 'react-bootstrap/Table';
+import axios from 'axios';
+import { adminURl } from '../../urls';
+import { useEffect, useState } from 'react';
 function ServiceProvider() {
 
+    var [serviceprovider, setdata] = useState([]);
+    
+    useEffect(() => {
+        function data() {
+            axios.get('http://localhost:3001/admin/serviceprovider')
+                .then((response) => {
+                    console.log("in then block")
+                    console.log("helloo------------------------> ", response);
+
+                    setdata(response.data.RegistrationData);
+                    console.log("state data on ",serviceprovider );
+                })
+                .catch((err) => console.log(err))
+        }
+        data();
+    },[]);
+
+   
+    function changeStatus(Email) {
+        console.log("Email=>",Email);
+        axios.post(adminURl + '/updatstatus',{Email})
+            .then((response) => {
+                console.log("Response ==>", response);
+                setdata(response.data.RegistrationData);
+            }).catch((err) => {
+                console.log("Error ==>", err);
+            })
+    }
 
     return (
         <>
-            <div className=" dataTable" >
-                <h3>
+            <div className="dataTable">
+                <h2>
                     Service Provider
-                </h3>
+                </h2>
                 <div className="col-md-12 col-sm-12 col-xs-12">
                     <div className="main-card mb-3 card">
-                    <div className='table-responsive'>
+                        <div className='table-responsive'>
+                            <table className='table table-striped' >
+                                <thead>
+                                    <tr>
+                                        <th>Serial No.</th>
+                                        <th> Name</th>
+                                        <th> Email</th>
+                                        <th> Phone</th>
+                                        <th> Address</th>
+                                        <th>Service Name</th>
+                                        <th>Service Type</th>
+                                        <th>Account Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {
+                                        serviceprovider.map((data, index) => {
+                                            console.log('data ', data);
+                                            return (
+                                                <tr key={data._id}>
+                                                    <td>{index + 1}</td>
+                                                    <td>{data.Name}</td>
+                                                    <td>{data.Email}</td>
+                                                    <td>{data.Contact_No}</td>
+                                                    <td>{data.Address},{data.City},{data.State}</td>
+                                                    <td>{data.Service_type}</td>
+                                                    <td>{data.Service_category}</td>
+                                                    <td>{data.Status}</td>
 
-                        <Table striped bordered hover>
-                            <thead>
-                                <tr>
-                                    <th>Serial No.</th>
-                                    <th> Name</th>
-                                    <th> Email</th>
-                                    <th> Phone</th>
-                                    <th> Address</th>
-                                    <th>Service Name</th>
-                                    <th> Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>1</td>
-                                    <td>Mark</td>   
-                                    <td>mark@gmail.com</td>
-                                    <td>+9822-587-495</td>
-                                    <td>chiman bag indore</td>
-                                    <td>Saloon</td>
-                                    <td ><button type="button" class="btn btn-warning w-100">Active</button></td>
-                                </tr>
-                                <tr>
-                                    <td>2</td>
-                                    <td>Jacob</td>
-                                    <td>Jacob@gmmail.com</td>
-                                    <td>+1111-222-333</td>
-                                    <td>indore</td>
-                                    <td>Electrician</td>
-                                    <td><button type="button" class="btn btn-danger w-100">Deactive</button></td>
+                                                    <td><button className='btn btn-success' onClick={()=>{changeStatus(data.Email)}} >Update Status</button></td>
+                                                </tr>
+                                            )
 
+                                        })
+                                    }
 
-                                </tr>
-                                <tr>
-                                    <td>3</td>
-                                    <td >Larry</td>
-                                    <td>Larry@gmail.com</td>
-                                    <td>+1111-222-333</td>
-                                    <td>burhanpur</td>
-                                    <td>Cook</td>
-                                    <td><button type="button" class="btn btn-warning w-100">Active</button></td>
-                                </tr>
-                                <tr>
-                                    <td>4</td>
-                                    <td >pankaj</td>
-                                    <td>pankaj@gmail.com</td>
-                                    <td>+1111-222-333</td>
-                                    <td>khandwa</td>
-                                    <td>House Shifting</td>
-                                    <td><button type="button" class="btn btn-danger w-100">Deactive</button></td>
-                                </tr>
-                                <tr>
-                                    <td>5</td>
-                                    <td >anu</td>
-                                    <td>anu@gmail.com</td>
-                                    <td>+1111-222-333</td>
-                                    <td>khargon</td>
-                                    <td>Cleaner</td>
-                                    <td><button type="button" class="btn btn-warning w-100">Active</button></td>
-                                </tr>
-                            </tbody>
-                        </Table>
+                                </tbody>
+                                
+                            </table>
                         </div>
-
                     </div>
                 </div>
             </div>
-
-
         </>
     );
 }

@@ -10,11 +10,18 @@ var storage = multer.diskStorage({
 export const upload= multer({
     storage: storage
 }).fields([
-    { name: 'ServiceImage', maxCount: 20 },
+    { name: 'ServiceImage', maxCount: 10 },
 ]);
 
 export const upload1= multer({
     storage: storage
 }).fields([
-    { name: 'aadharimg', maxCount: 1 },
+    { name: 'aadharimg', maxCount: 1},
+    { name: 'AgencyImg', maxCount: 1},
+]);
+
+export const upload2 = multer({
+    storage: storage
+}).fields([
+    { name: 'ServiceImage', maxCount: 1 },
 ]);

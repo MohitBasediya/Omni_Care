@@ -1,67 +1,159 @@
-import React from "react";
-import profile from "../../images/profileimg.jpg";
+import React, { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import './Customer.css';
-import $ from "jquery";
-import "datatables.net-dt/css/jquery.dataTables.min.css";
-import "datatables.net-responsive-dt/css/responsive.dataTables.min.css";
-import "datatables.net";
-import "datatables.net-responsive";
-import { useEffect } from "react";
-
+import axios from "axios";
+import { requestedURL } from "../../urls";
+import { useEffect} from "react";
+import { useSelector } from "react-redux";
+import Swal from 'sweetalert2';
+import Customer_Modal from './Customer_Modal.js';
 export default function CustomerBooking() {
-  useEffect(() => {
-    // Initialize DataTable after component mounts
-    $("#myTable").DataTable();
-  }, []);
-  return (
-    // <div>
-    //   <div className="container-fluid">
-    //     <div className="row">
 
-          <div className="col-sm-12 col-md-6 col-lg-6">
+  const [bookingData,setBookingData]=useState([]);
+  const [confirmBooking,setConfirmBooking] = useState({});
+  const updatedUserData = useSelector(state=> state.userSlice.user_Data);
+  const [paymentModal,setPaymentModal] = useState(false);
+
+  const cancelBooking = async(booking)=>{
+     try{
+       const today = new Date();
+       const [hours, minutes] = booking.Time.split(':');
+       const bookingDate = new Date(booking.Date);
+       const bookingTime = new Date();
+       bookingTime.setHours(hours);
+       bookingTime.setMinutes(minutes);
+       const id=booking._id;
+        if(bookingDate - today >0) {
+             var result = await axios.get(`${requestedURL}/cancelBooking/${id}`);
+             if(result.status===201){
+                Swal.fire("Booking canceled");
+             }
+        }else if((bookingTime.getTime() - today.getTime())>=1){
+              var result = await axios.get(`${requestedURL}/cancelBooking/${id}`);
+              if(result.status===201){
+                Swal.fire("Booking canceled");
+              }
+        }else{
+              Swal.fire("You can't cancelled a booking according to Terms & condition");
+        }
+     }catch(error){
+       console.log('error : ',error);
+     }
+ }
+
+ useEffect(() => {
+  console.log("booking ",updatedUserData);
+    const fetchservice = async () => {
+      try {
+        console.log('fetch service ',updatedUserData);
+        const id = updatedUserData._id;
+        const result = await axios.get(requestedURL +`/getServices/${id}`);
+        if (result.status === 201) {
+          console.log('result : ',result.data.BookingData);
+          setBookingData(result.data.BookingData);
+        }
+      } catch (error) {
+        console.log('error : ', error);
+      }
+    }
+    if(updatedUserData){
+      fetchservice();
+    }
+}, []); 
+
+
+  const openModal = (booking)=>{
+        setConfirmBooking(booking);
+        setPaymentModal(true);
+  }
+  
+  return (
+        <>
+          <div className="col-sm-12 col-md-10 col-lg-10">
             <div>
-              <h3 style={{padding:"1rem",backgroundColor:"#FFC737",width:"10rem",marginTop:"2rem"}}>Bookings</h3>
+              <h3 style={{padding:"1rem",width:"10rem",marginTop:"2rem"}}>Bookings</h3>
             </div>
-            <div className="table-responsive" style={{backgroundColor:"white", marginTop:"3rem"}}>
-              <table
-                id="myTable"
-                className="display p-2 nowrap"
-                style={{ width: "100%"}}
-              >
-                <thead>
+            <div className="table-responsive" style={{backgroundColor:"white", marginTop:"1rem"}}>
+              <table className="table table-bordered table-hover">
+                <thead className="sticky-top">
                   <tr>
                     <th>S.No</th>
-                    <th>Name</th>
-                    <th>Contact No.</th>
+                    <th>Services</th>
                     <th>Date Of Service</th>
+                    <th>Time Of Service</th>
                     <th>Total Amoount</th>
+                    <th>Service Provider</th>
                     <th>Status</th>
-                    <th>Action</th>
+                    <th colSpan={2} className="text-center">Action</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {/* Example rows, make sure the number of columns matches the header */}
-                  <tr>
-                    <td>1</td>
-                    <td>System Architect</td>
-                    <td>80854-34245</td>
-                    <td>06/08/23</td>
-                    <td>78$</td>
-                    <td>
-                      <button id="viewbutton">Complete</button>
-                    </td>
-                    <td>
-                      <button id="viewbutton">View</button>
-                    </td>
-                  </tr>
-                  {/* Add more rows as needed */}
+                  {
+                      (bookingData.length>0)?
+                        bookingData.map((booking,index)=>{
+                        return(
+                          <tr>
+                             <td>{index+1}</td>
+                             <td>{booking.ServiceName}</td>
+                             <td>{booking.Date}</td>
+                             <td>{booking.Time}</td>
+                             <td>{booking.TotalPrice}</td>
+                             <td>{
+                                  (booking.Status==='Accepted' || booking.Status==='Confirm')?
+                                   booking.ServiceProviderName
+                                   :
+                                   'Pending'
+                                  }
+                              </td>
+                             <td>{booking.Status}</td>
+                             <td>
+                                 {
+                                  (booking.Status==='Pending')?
+                                      <button className='btn btn-outline-secondary'>Pending</button>
+                                    :
+                                  (booking.Status==='Accepted')?
+                                      <button className='btn btn-outline-success' onClick={()=>{openModal(booking)}}>Pay Now</button>
+                                    :
+                                  (booking.Status==='Cancel')?
+                                      ''
+                                    :  
+                                      <button className='btn btn-outline-primary'>View</button>
+                                 }
+                             </td>
+                             <td>
+                              {
+                                (booking.Status==='Completed')?
+                                <button className="btn btn-outline-warning">Bill</button>
+                                :
+                                <button className="btn btn-outline-danger" onClick={()=>{cancelBooking(booking)}}>Cancel</button>
+                              }
+                             </td>
+                          </tr>
+                        );
+                      })
+                      :
+                      <tr>
+                        <td>No Booking Found </td>
+                        <td>No Booking Found </td>
+                        <td>No Booking Found </td>
+                        <td>No Booking Found </td>
+                        <td>No Booking Found </td>
+                        <td>No Booking Found </td>
+                        <td>No Booking Found </td>
+                        <td>No Booking Found </td>
+                      </tr>
+                  }
+                  
                 </tbody>
               </table>
             </div>
           </div>
-    //     </div>
-    //   </div>
-    // </div>
+          {
+            (paymentModal)?
+            <Customer_Modal booking={confirmBooking} userData={updatedUserData}/>:
+            ''
+          }
+          </>
+          
   );
 }

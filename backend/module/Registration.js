@@ -23,6 +23,10 @@ var registration_schema=new mongoose.Schema({
     User_Role:{
         type:String,
         required:true
+    },
+    Status:{
+        type:String,
+        default:'Active'
     }
 });
 export const registration=mongoose.model("registration",registration_schema);

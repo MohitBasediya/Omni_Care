@@ -10,7 +10,7 @@ import './Home.css';
 function Aboutus(){
     return(
          <>
-         <section id="about" className='w-100'>
+         <section id="about" className='w-100' style={{background:'white'}}>
             <div className="container">
                 <div className="row">
                   <div className="col-lg-5 py-3 ">
@@ -21,7 +21,7 @@ function Aboutus(){
                         <div className="col-md-6 col-6 p-3">
                         <Link style={{textDecoration:'none'}}>
                           <div className="h-30 w-100 bg-yellow d-flex justify-content-around align-items-center">
-                              <p className="text-light">Cleaner</p>
+                              <p style={{color:'white'}}>Cleaner</p>
                               <img src={logo1} />
                           </div>
                         </Link>
@@ -29,7 +29,7 @@ function Aboutus(){
                         <div className="col-md-6 col-6 p-3">
                          <Link style={{textDecoration:'none'}}>
                           <div className="h-30 w-100 bg-yellow d-flex justify-content-around align-items-center">
-                              <p className="text-light ">Cleaner</p>
+                              <p style={{color:'white'}}>Cleaner</p>
                               <img src={logo2} />
                           </div>
                           </Link>  
@@ -39,7 +39,7 @@ function Aboutus(){
                           <div className='col-md-4 col-4 py-3 px-1'>
                            <Link style={{textDecoration:'none'}}>
                              <div className="h-30 w-100 bg-yellow d-flex justify-content-around align-items-center">
-                                <p className="text-light">Cleaner</p>
+                                <p style={{color:'white'}}>Cleaner</p>
                                 <img src={logo3} />
                              </div>
                            </Link>
@@ -47,7 +47,7 @@ function Aboutus(){
                           <div className='col-md-4 col-4 py-3 px-1'>
                             <Link style={{textDecoration:'none'}}>
                              <div className="h-30 w-100 bg-yellow d-flex justify-content-around align-items-center">
-                                <p className="text-light">Cleaner</p>
+                                <p style={{color:'white'}}>Cleaner</p>
                                 <img src={logo4} />
                              </div>
                             </Link>
@@ -55,7 +55,7 @@ function Aboutus(){
                           <div className='col-md-4 col-4 py-3 px-1'>
                             <Link style={{textDecoration:'none'}}>
                              <div className="h-30 w-100 bg-yellow d-flex justify-content-around align-items-center">
-                                <p className="text-light">Cleaner</p>
+                                <p style={{color:'white'}}>Cleaner</p>
                                 <img src={logo5} />
                              </div>
                             </Link>

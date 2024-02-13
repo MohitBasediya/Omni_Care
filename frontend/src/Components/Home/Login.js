@@ -29,18 +29,20 @@ function Login()
               if(cookie_token){
                 try{
                      console.log(cookie_token);
-                    var result = await axios.post(requestedURL+'/awt_login',{token:cookie_token});                                     
+                        var result = await axios.post(requestedURL+'/awt_login',{token:cookie_token});                                     
                     if(result.status==201){
                     //    Swal.fire("awthenticate");
                        console.log("useEffect");
                        dispatch(userData(result.data.payload.user.data));
                        console.log('service_provider : ',result.data);
-                       if (result.data.payload.user.data.User_Role === 'Service Provider') {
-                        console.log('service provider : ',result.data.payload.User_Role);
+                       if (result.data.payload.user.role === 'Service Provider') {
+                        console.log('service provider : ',result.data.payload.user.data[0]);
+                        dispatch(result.data.payload.user.data);
                         navigate('/Service_provider_profile');
                        }
                        else{
                         console.log('service provider : ',result.data.payload.User_Role);
+                        dispatch(result.data.payload.user.data);
                         navigate('/customer_profile');
                        }
                        setIsModel(false);
@@ -81,7 +83,7 @@ function Login()
                 }
                 break;
             case 'Password':
-                var reg = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+              var reg = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
                 if(value.trim()===""){
                     document.getElementById('password').style.color='red';
                     document.getElementById('pass').innerHTML='Password Required';
@@ -132,8 +134,9 @@ function Login()
                Cookie.set('Login_Jwt_token',result.data.token,{expires:7});
                console.log('result :',result.data.exist);
                dispatch(userData(result.data.exist));
-               if (result.data.exist.User_Role === 'Service Provider') {
-                navigate('/Service_provider_profile')
+               if (result.data.role === 'Service Provider') {
+                console.log("Service ")
+                navigate('/Service_provider_profile');
                }
                else{
                 navigate('/customer_profile');

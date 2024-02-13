@@ -30,6 +30,13 @@
   width: 100%;
   z-index: 1000;
 }
+.bg-rgba2{
+  background: rgba(0, 0, 0, 0.8);
+}
+.btn-close{
+  background: white!important;
+  color: black!important;
+}
 .bg-yellow{
   background: #FFB649;
   border-radius: 11px;
