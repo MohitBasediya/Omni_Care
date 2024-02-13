@@ -1,4 +1,3 @@
-// import elect_img from "../images/eleimg.webp";
 import cook from '../../images/cook2.jpg';
 import './Registration.css';
 import Swal from 'sweetalert2';
@@ -8,18 +7,24 @@ import {requestedURLForServiceProvider} from '../../urls.js'
 import state_arr from './City_State_Array.js';
 import s_a from './City_State_Array.js';
 import axios from "axios";
+import { userData } from "../../store/userSlice.js";
+import { useDispatch } from "react-redux";
+import Cookie from 'js-cookie';
+import ServiceProvider_Modal from './ServiceProvider_Modal.js';
 
 
 function Cooking_Registration() {
 	
 	const navigate = useNavigate();
 	const location = useLocation();
-
+    const dispatch = useDispatch();
 	const [Address,setAddress] = useState(false);
 	const [State,setStatee]=useState(false);
 	const [City,setCity]=useState(false);
 	const [providerData, setProviderData] = useState({});
-
+	const [services,setProviderServices] = useState([]);
+    const [isModal, setIsModal] = useState(false);
+	
 	const handleInput = (e)=>{
 		if(e.target.type === 'file'){
 			const file  = e.target.files[0];
@@ -91,51 +96,41 @@ function Cooking_Registration() {
 
 	const submitData = async (e) => {
 		e.preventDefault();
-        
         console.log("After Adding Img ",providerData);
-		var checkBoxes = "";
-		checkBoxes += (document.getElementById('Primary').checked)?"Primary " : "";
-		checkBoxes += (document.getElementById('Secondary').checked)?"Secondary " : "";
-		checkBoxes += (document.getElementById('Tertiary').checked)?"Tertiary " : "";
-		console.log(checkBoxes);		
-		
 		if (Address && State && City) {		  
-		  const formData = new FormData();
-		   console.log("providerData : ",providerData);
-			for(const index in providerData){
-				console.log("providerData[index] : ",providerData[index],' index : ====================',index);
-				if(providerData[index]){
-					formData.append(index, providerData[index]); 
-				}			
-			}
-			console.log("formData : ",formData);
-		  try {
-			var result = await axios.post(requestedURLForServiceProvider + '/providerdata', formData);
-			console.log("Result : ",result);
-			if(result.status==201){
-				Swal.fire("Data Added");
-				console.log("provider data : ",result);
-				console.log("location.state.id : ",location.state.id);
-
-				if(result.data.providerData.User_id===location.state.id){
-					navigate('/Service_provider_profile');
-				}
-
-			}
-			else if(result.status==500){
-				Swal.fire('Error when add data');
-			}
-			else if(result.status==500){
-				Swal.fire('You Enter Wrong Otp');   
-			}
-
-		  } catch (err) {
-			console.error('Error submitting data:', err);
-		  }
+			setIsModal(true)
 		} else {
 		  console.log('Some fields are empty');
 		}
 	};
+    
+	const submitData2=async()=>{
+		try {
+				var result = await axios.post(requestedURLForServiceProvider + '/providerdata');
+				console.log("Result : ",result);
+				if(result.status==201){
+					Swal.fire("Data Added");
+					console.log("provider data : ",result);
+					console.log("location.state.id : ",location.state.id);
+	
+					Cookie.set('Login_Jwt_token',result.data.token,{expires:'7d'});
+					dispatch(userData(result.data.data));
+					if(result.data.token){
+						navigate('/Service_provider_profile');
+					}
+	
+				}
+				else if(result.status==500){
+					Swal.fire('Error when add data');
+				}
+				else if(result.status==500){
+					Swal.fire('You Enter Wrong Otp');   
+				}
+	
+			  } catch (err) {
+				console.error('Error submitting data:', err);
+			  }
+	}
 
 	const print_state = () => {
         var option_str = document.getElementById("state");
@@ -167,11 +162,32 @@ function Cooking_Registration() {
     }
 
 	useEffect(()=>{
-		const timeoutId = setTimeout(() => {
-            print_state();
-			setProviderData({...providerData,['User_id']:location.state.id,['Service_type']:'Cooking'});
-        }, 1000);
-		return () => clearTimeout(timeoutId);
+		if(!location.search){
+			const timeoutId = setTimeout(() => {
+				print_state();
+				setProviderData({...providerData,['User_id']:location.state.id,['Service_type']:'Cook',['pathname']:location.pathname});
+			}, 1000);
+			return () => clearTimeout(timeoutId);
+		}else{
+			const params = new URLSearchParams(location.search);
+			const status = params.get('status');
+			if(status==='true'){
+				console.log("providerdata : ",providerData);
+                submitData2();
+			}else{
+				Swal.fire("Payment unsuccessful");
+			}
+		}
+	},[]);
+
+	useEffect(()=>{
+		const  serviceProviderServices = async(e)=>{
+			var result = await axios.get(requestedURLForServiceProvider + `/getproviderservice?Service_type=${'Cooking'}`);
+			console.log("Result Provider Services : ",result);
+			setProviderServices(result.data.services);
+			console.log("setProviderServices=>",services);
+		}
+		serviceProviderServices();
 	},[]);
 
 	const handleClick = (value) => {
@@ -239,6 +255,8 @@ function Cooking_Registration() {
 										<i class="flaticon-envelope"></i>
 									</div>
 								</div>
+
+
 								<div style={{ marginTop: "5vh" }}>
 									<h1 className="fw-normal">Your Services</h1>
 									<div className="p-2 my-2" style={{background:'white'}}>
@@ -246,47 +264,148 @@ function Cooking_Registration() {
 										<div class="accordion-item">
 											<h2 class="accordion-header" id="headingOne">
 											<button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-												Accordion Item #1
+												SouthIndian Items
 											</button>
 											</h2>
 											<div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
 											<div class="accordion-body">
-												<strong>This is the first item's accordion body.</strong> It is shown by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.
+												<ul>
+													{
+														services.map((spservices) => {
+														console.log("==>", spservices);
+
+														return spservices.South_Indian.map((southindianService) => (															
+															<li>
+																<div className='w-100 d-flex justify-content-between py-2'>
+																	<h4>{southindianService.ServiceName}</h4>
+																    <h5>{southindianService.Price}</h5>
+																</div>   
+															</li>
+														));
+														})
+													}
+												</ul>
 											</div>
 											</div>
 										</div>
 										<div class="accordion-item">
 											<h2 class="accordion-header" id="headingTwo">
 											<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-												Accordion Item #2
+											    Gujrati Items
 											</button>
 											</h2>
 											<div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
 											<div class="accordion-body">
-												<strong>This is the second item's accordion body.</strong> It is hidden by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.
+												<ul>
+													{
+														services.map((spservices) => {
+														console.log("==>", spservices);
+														return spservices.Gujarati.map((gujaratiService) => (											
+															<li>
+																<div className='w-100 d-flex justify-content-between py-2'>
+																	<h4>{gujaratiService.ServiceName}</h4>
+																    <h5>{gujaratiService.Price}</h5>
+																</div>   
+															</li>
+														));
+														})
+													}
+												</ul>
 											</div>
 											</div>
 										</div>
+
 										<div class="accordion-item">
 											<h2 class="accordion-header" id="headingThree">
 											<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-												Accordion Item #3
+											    Rajasthani Items
 											</button>
 											</h2>
 											<div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample">
 											<div class="accordion-body">
-												<strong>This is the third item's accordion body.</strong> It is hidden by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.
+												<ul>
+													{
+														services.map((spservices) => {
+														console.log("==>", spservices);
+														return spservices.Rajasthani.map((rajasthaniService) => (
+															<li>
+																<div className='w-100 d-flex justify-content-between py-2'>
+																	<h4>{rajasthaniService.ServiceName}</h4>
+																    <h5>{rajasthaniService.Price}</h5>
+																</div>   
+															</li>
+														));
+														})
+													}
+												</ul>
+											</div>
+											</div>
+										</div>
+
+										<div class="accordion-item">
+											<h2 class="accordion-header" id="headingFour">
+											<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+											    Chinese Items
+											</button>
+											</h2>
+											<div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#accordionExample">
+											<div class="accordion-body">
+												<ul>
+													{
+														services.map((spservices) => {
+														console.log("==>", spservices);
+														return spservices.Chinese.map((chineseService) => (
+															<li>
+																<div className='w-100 d-flex justify-content-between py-2'>
+																	<h4>{chineseService.ServiceName}</h4>
+																    <h5>{chineseService.Price}</h5>
+																</div>   
+															</li>
+														));
+														})
+													}
+												</ul>
+											</div>
+											</div>
+										</div>
+
+										<div class="accordion-item">
+											<h2 class="accordion-header" id="headingFive">
+											<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
+											    Regular Meal Items
+											</button>
+											</h2>
+											<div id="collapseFive" class="accordion-collapse collapse" aria-labelledby="headingFive" data-bs-parent="#accordionExample">
+											<div class="accordion-body">
+												<ul>
+													{
+														services.map((spservices) => {
+														console.log("==>", spservices);
+														return spservices.Normal.map((normalService) => (
+															<li>
+																<div className='w-100 d-flex justify-content-between py-2'>
+																	<h5>{normalService.ServiceName}</h5>
+																    <h5>{normalService.ServicePrice}</h5>
+																</div>   
+															</li>																
+														));
+														})
+													}
+												</ul>
 											</div>
 											</div>
 										</div>
 										</div>
 									</div>									
 								</div>
+								
 								<h1>Select Service category</h1>
                                 <div className="my-2 p-2" style={{background:'white'}}>
-								<input type="checkbox" className="form-check-input mx-4" name="Servicecategory" value="Primary" id= 'Primary' onChange={(e)=>{handleInput(e)}}/>Primary
-									<input type="checkbox" className="form-check-input mx-4" name="Servicecategory" value="Secondary" id= 'Secondary' onChange={(e)=>{handleInput(e)}}/>Secondary
-									<input type="checkbox" className="form-check-input mx-4" name="Servicecategory" value="Tertiary" id= 'Tertiary' onChange={(e)=>{handleInput(e)}}/>Tertiary 
+								    <input type="checkbox" className="form-check-input mx-4" name="Servicecategory" value="SouthIndian" id='SouthIndian' onChange={(e)=>{handleInput(e)}}/>SouthIndian
+									<input type="checkbox" className="form-check-input mx-4" name="Servicecategory" value="Gujrati" id='Gujrati' onChange={(e)=>{handleInput(e)}}/>Gujrati
+									<input type="checkbox" className="form-check-input mx-4" name="Servicecategory" value="Rajasthani" id='Rajasthani' onChange={(e)=>{handleInput(e)}}/>Rajasthani 
+									<input type="checkbox" className="form-check-input mx-4" name="Servicecategory" value="Chinese" id='Chinese' onChange={(e)=>{handleInput(e)}}/>Chinese
+									<input type="checkbox" className="form-check-input mx-4" name="Servicecategory" value="Regular" id='Regular' onChange={(e)=>{handleInput(e)}}/>Regular 
 								</div>
 								<div className="form-group">
 									<div className="fxt-content-between d-flex justify-content-end">
@@ -298,6 +417,11 @@ function Cooking_Registration() {
 					</div>
 				</div>
 			</div>
+			{
+				(isModal)?
+					<ServiceProvider_Modal providerdata={providerData} />
+				 :''
+			}
 		</section>
 	)
 }

@@ -11,7 +11,7 @@ var CookSchema = new mongoose.Schema({
             type: String,
         },
         ServicePrice: {
-            type: String,
+            type: Number,
         },
         ServiceDesc: {
             type: String,
@@ -25,7 +25,7 @@ var CookSchema = new mongoose.Schema({
             type: String,
         },
         ServicePrice: {
-            type: String,
+            type: Number,
         },
         ServiceDesc: {
             type: String,
@@ -39,7 +39,7 @@ var CookSchema = new mongoose.Schema({
             type: String,
         },
         ServicePrice: {
-            type: String,
+            type: Number,
         },
         ServiceDesc: {
             type: String,
@@ -53,7 +53,7 @@ var CookSchema = new mongoose.Schema({
             type: String,
         },
         ServicePrice: {
-            type: String,
+            type: Number,
         },
         ServiceDesc: {
             type: String,
@@ -67,7 +67,7 @@ var CookSchema = new mongoose.Schema({
             type: String,
         },
         ServicePrice: {
-            type: String,
+            type: Number,
         },
         ServiceDesc: {
             type: String,

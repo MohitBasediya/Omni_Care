@@ -2,15 +2,21 @@ import slide1 from '../../images/slide1.jpg';
 import slide2 from '../../images/slide2.jpg';
 import slide3 from '../../images/slide3.jpg';
 import {Link} from 'react-router-dom';
-import {useState} from 'react';
+import {useState,useEffect} from 'react';
 import axios from 'axios';
 import {Modal} from 'reactstrap';
 import Login from './Login';
 import Swal from 'sweetalert2';
+import { userData } from '../../store/userSlice';
+import { useDispatch } from 'react-redux';
 import { requestedURL } from '../../urls';
 import './Home.css';
 import { useNavigate } from 'react-router-dom';
+import Cookie from 'js-cookie';
+var role='';
 function Home(){ 
+    const [istoken,setIstoken]=useState(false);
+    const dispatch=useDispatch();
     const [Username,setUsername]=useState(false);
     const [Email,setEmail]=useState(false);
     const [Password,setPassword]=useState(false);
@@ -159,16 +165,20 @@ function Home(){
         try{
             console.log('otp  ',userotp);
             var result=await axios.post(requestedURL+'/verifyotp',userotp);
+            console.log('result ',result);
             if(result.status===201){
                 Swal.fire("Data Added");
                 setIsModal(false);
-                console.log('userdata : ',result.data.userdata);
                 if(result.data.userdata.User_Role==='Service Provider'){
                  navigate('/Electrician_Registration',{
                     state:{
                       id:result.data.userdata._id
                     }
                  });
+                }else{
+                    Cookie.set('Login_Jwt_token',result.data.token,{expires:7});
+                    dispatch(userData(result.data.userdata));
+                    navigate('/customer_profile');
                 }
             }
             else if(result.status===500){
@@ -178,11 +188,31 @@ function Home(){
                 Swal.fire('You Enter Wrong Otp');   
             }
         }catch(error){
+            console.log('error ',error);
             Swal.fire('Error while checking otp in catch');   
         }
-        window.location.reload();
     }
-    
+    useEffect(()=>{
+        const authenticate=async()=>{
+        var token=Cookie.get('Login_Jwt_token');
+        if(token){
+            var result=await axios.post(`${requestedURL}/awt_login`,{token});
+            console.log('result in home ',result);
+            if(result.status===201){
+                console.log('isoken in Home Component ',istoken);
+                setIstoken(true);
+                dispatch(userData(result.data.payload.user.data));
+            }else{
+                console.log('result in else ',result);
+                setIstoken(false);
+            }
+        }
+        else{
+            setIstoken(false);
+        }
+      }
+      authenticate();
+    },[])
     return(
         <>
         <section id="home">        
@@ -194,41 +224,50 @@ function Home(){
             <div className='hero' >
                 <div className='container-fluid con-p'>
                      <div className='row'>
-                        <div className='col-md-6 py-3 d-flex justify-content-center flex-column align-items-start'>
-                           <h1 className='px-5 mx-3 pb-3 text-warning' >At-Home Excellence: Services Beyond Your Door </h1>
-                           <p className='px-5 text-light mx-3 pb-3'>Welcome to OmniCare, where your home is our priority.Experience the luxury of premium services delivered directly to your doorstep.From skilled professionals to personalized care, we're here to transform your living space into a haven of comfort and excellence.</p>
-                           <div className='ps-3'>
-                             {/* <button className='btn ms-5 btn-outline-warning text-light h-btn fw-bold'>Sign Up </button> */}
-                           </div>
-                        </div>
-
-                        <div className='col-md-6 d-flex form-div justify-content-center px-4 align-items-center'>
-                            <div className='py-3 px-3 bg-yellow w-75 border-0 rounded-3' style={{background:'#FFC36A'}}>
-                                <h3 className='fw-bold px-3 py-2'>Join with Us</h3>
-                                <form method='post' onSubmit={submitData} className='px-3'>
-                                    <input type='text' name='Name' onChange={(e)=>{ handleInput(e) }} id='username' placeholder='Enter Name' className='my-3 py-2 form-control px-3 rounded-2 border-0' />
-                                    <span id='Username'></span>
-                                    <input type='email' onChange={(e)=>{ handleInput(e) }} name='Email' id='email' placeholder='Enter Email' className='my-3 py-2 form-control px-3 rounded-2 border-0' />
-                                    <span id='Email'></span>
-                                    <input type='password' onChange={(e)=>{ handleInput(e) }} name='Password' id='password' placeholder='Enter password' className='my-3 py-2 form-control px-3 rounded-2 border-0' />
-                                    <span id='Password'></span>
-                                    <input type='text' name='Contact_No' onChange={(e)=>{ handleInput(e) }} id='contact' placeholder='Enter Contact Number' className='my-3 py-2 form-control px-3 rounded-2 border-0' />
-                                    <span id='Contact' className='d-block'></span>
-                                    <input type='radio' name='Gender' id='male' value='Male' onClick={(e)=>{ handleInput(e) }} className='mb-2 form-check-input border-0' /><lable className='text-light px-2 pt-4'> Male</lable>
-                                    <input type='radio' name='Gender' id='female' value='Female' onClick={(e)=>{ handleInput(e) }} className='mb-2 form-check-input border-0' /><lable className='text-light px-2 pt-4'> Female</lable>
-                                    <span id='Gender' className='d-block'></span>
-                                    <select name='User_Role' id='role' className=' py-2 form-control px-3 my-2' onChange={handleInput}>
-                                        <option value=''>Select Role</option>
-                                        <option value='Customer'>Customer</option>
-                                        <option value='Service Provider'>Service Provider</option>
-                                    </select>
-                                    <div className='d-flex justify-content-center'>
-                                      <input type='submit' value='Send Otp' className='btn px-5 rounded-2 btn btn-dark btn-block mx-auto my-2' />
-                                    </div>
-                                </form>
-                                <p className='text-center '>Already have an account ?<Link  className='fw-bold text-light px-2 text-decoration-none'  onClick={()=>{setIsLogin(true)}}>Login</Link> </p>
+                        <div className='col-md-6 d-flex align-items-center' style={(istoken)?{padding:'100px',justifyContent:'center',width:'100%'}:{justifyContent:'start'}}>
+                          <div className='w-100 py-3 d-flex justify-content-center flex-column align-items-start'>
+                            <h1 className='px-5 mx-3 pb-3 text-warning' >At-Home Excellence: Services Beyond Your Door </h1>
+                            <p className='px-5 text-light mx-3 pb-3'>Welcome to OmniCare, where your home is our priority.Experience the luxury of premium services delivered directly to your doorstep.From skilled professionals to personalized care, we're here to transform your living space into a haven of comfort and excellence.</p>
+                            <div className='ps-3'>
+                                {/* <button className='btn ms-5 btn-outline-warning text-light h-btn fw-bold'>Sign Up </button> */}
                             </div>
+                          </div>
                         </div>
+                        {
+                            (!istoken)?
+                            <div className='col-md-6 d-flex form-div justify-content-center px-4 align-items-center'>
+                                <div className='py-3 px-3 bg-yellow w-75 border-0 rounded-3' style={{background:'#FFC36A'}}>
+                                    <h3 className='fw-bold px-3 py-2'>Join with Us</h3>
+                                    <form method='post' onSubmit={submitData} className='px-3'>
+                                        <input type='text' name='Name' onChange={(e)=>{ handleInput(e) }} id='username' placeholder='Enter Name' className='my-3 py-2 form-control px-3 rounded-2 border-0' />
+                                        <span id='Username'></span>
+                                        <input type='email' onChange={(e)=>{ handleInput(e) }} name='Email' id='email' placeholder='Enter Email' className='my-3 py-2 form-control px-3 rounded-2 border-0' />
+                                        <span id='Email'></span>
+                                        <input type='password' onChange={(e)=>{ handleInput(e) }} name='Password' id='password' placeholder='Enter password' className='my-3 py-2 form-control px-3 rounded-2 border-0' />
+                                        <span id='Password'></span>
+                                        <input type='text' name='Contact_No' onChange={(e)=>{ handleInput(e) }} id='contact' placeholder='Enter Contact Number' className='my-3 py-2 form-control px-3 rounded-2 border-0' />
+                                        <span id='Contact' className='d-block'></span>
+                                        <input type='radio' name='Gender' id='male' value='Male' onClick={(e)=>{ handleInput(e) }} className='mb-2 form-check-input border-0' /><lable for='male' style={{color:'white',cursor:'pointer'}} className='px-2 pt-4'>Male</lable>
+                                        <input type='radio' name='Gender' id='female' value='Female' onClick={(e)=>{ handleInput(e) }} className='mb-2 form-check-input border-0' /><lable for='female' style={{color:'white',cursor:'pointer'}} className='px-2 pt-4'>Female</lable>
+                                        <span id='Gender' className='d-block'></span>
+                                        <select name='User_Role' id='role' className=' py-2 form-control px-3 my-2' onChange={handleInput}>
+                                            <option value=''>Select Role</option>
+                                            <option value='Customer'>Customer</option>
+                                            <option value='Service Provider'>Service Provider</option>
+                                        </select>
+                                        <div className='d-flex justify-content-center'>
+                                        <input type='submit' value='Send Otp' className='btn px-5 rounded-2 btn btn-dark btn-block mx-auto my-2' />
+                                        </div>
+                                    </form>
+                                    <p className='text-center '>Already have an account ?<Link  className='fw-bold px-2 text-decoration-none' style={{color:'white'}}  onClick={()=>{setIsLogin(true)}}>Login</Link> </p>
+                                </div>
+                            </div>
+                            :
+                            <div className='col-md-6' style={{height:'100vh'}}>
+                                <pre>           
+                                </pre>
+                            </div>
+                        }
                      </div>  
                 </div>
            </div>

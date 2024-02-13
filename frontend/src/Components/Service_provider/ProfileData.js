@@ -1,64 +1,70 @@
 import { useSelector } from 'react-redux';
 export default function Profile(){
     const userData = useSelector(state => state.userSlice.user_Data);
-    return(<>
-            <div class="col-lg-9 col-sm-12">                       
-                <section className="userDetails card">
-                    <div className="userName">
-                        <h1 className="name">{userData.Name}</h1>
-                        <div className="map">
-                            <i className="ri-map-pin-fill ri"></i>
-                            <span>Indore</span>
-                        </div>
-                        <p>Service provider</p>
-                    </div>                    
-                </section>
-                <section className="timeline_about card">
-                    <div className="tabs">
-                        <ul>
-                            <li className="about active">
-                                <i className="ri-user-3-fill ri i"></i>
-                                <span><i className="fa-solid fa-user i"></i> &nbsp; About You</span>
-                            </li>
-                        </ul>
-                    </div>
+    return(<>         
 
-                    <div className=''>
-                        <div className='row'>
-                            <div class="col-3">
-                                <p class="servicehtag">Id : </p>
-                            </div>
-                            <div class="col-9">
-                                <p class="servicepara">{userData._id}</p>
-                            </div>
-                            <div class="col-3">
-                                <p class="servicehtag">Email : </p>
-                            </div>
-                            <div class="col-9">
-                                <p class="servicepara">{userData.Email}</p>
-                            </div>
-                            <div class="col-3">
-                                <p class="servicehtag">Contact Number </p>
-                            </div>
-                            <div class="col-9">
-                                <p class="servicepara">{userData.Contact_No}</p>
-                            </div>
-                            <div class="col-3">
-                                <p class="servicehtag">Service Type : </p>
-                            </div>
-                            <div class="col-9">
-                                <p class="servicepara">Electrical</p>
-                            </div>
-                            <div class="col-3">
-                                <p class="servicehtag">Address : </p>
-                            </div>
-                            <div class="col-9">
-                                <p class="servicepara">SGSITS , Indore (M.P.)</p>
-                            </div>
-                        </div>
+            <div className="col-lg-9 m-auto">
+              <div className="card mb-4">
+                <div className="card-body">
+                  <div className="row">
+                    <div className="col-sm-3">
+                      <p className=" text-lg mb-0">Full Name</p>
                     </div>
-                </section>
+                    <div className="col-sm-9">
+                      <p className="text-muted text-lg mb-0 text-capitalize">{userData[0].Name}</p>
+                    </div>
+                  </div>
+                  <hr></hr>
+                  <div className="row">
+                    <div className="col-sm-3">
+                      <p className="mb-0 text-lg">Email</p>
+                    </div>
+                    <div className="col-sm-9">
+                      <p className="text-muted mb-0 text-lg">{userData[0].Email}</p>
+                    </div>
+                  </div>
+                  <hr></hr>
+                  <div className="row">
+                    <div className="col-sm-3">
+                      <p className="mb-0 text-lg">Phone</p>
+                    </div>
+                    <div className="col-sm-9">
+                      <p className="text-muted mb-0 text-lg">{userData[0].Contact_No}</p>
+                    </div>
+                  </div>
+                  <hr></hr>
+                  <div className="row">
+                    <div className="col-sm-3">
+                      <p className="mb-0 text-lg">Services</p>
+                    </div>
+                    <div className="col-sm-9">
+                      <p className="text-muted mb-0 text-capitalize text-lg">{userData[1].Service_type}</p>
+                    </div>
+                  </div>
+                  <hr></hr>
+                  <div className="row">
+                    <div className="col-sm-3">
+                      <p className="mb-0 text-lg">Service Category</p>
+                    </div>
+                    <div className="col-sm-9">
+                      <p className="text-muted mb-0 text-lg text-capitalize">{userData[1].Service_category}</p>
+                    </div>
+                  </div>
+                  <hr></hr>
+                  <div className="row">
+                    <div className="col-sm-3">
+                      <p className="mb-0 text-lg">Address</p>
+                    </div>
+                    <div className="col-sm-9">
+                      <p className="text-muted mb-0 text-lg text-capitalize">{userData[1].Address}, {userData[1].City} ,{userData[1].State}</p>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+              
             </div>
+            
         </>           
     )
 }

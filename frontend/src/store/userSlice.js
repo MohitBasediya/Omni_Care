@@ -1,6 +1,4 @@
 import {createSlice} from '@reduxjs/toolkit';
-import axios from 'axios';
-import { requestedURL } from '../urls.js';
 
 const initialState = {
     user_Data : {},

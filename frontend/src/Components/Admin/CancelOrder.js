@@ -1,6 +1,24 @@
+import axios from 'axios';
+import { useEffect, useState } from 'react';
 import Table from 'react-bootstrap/Table';
 function CancelOrder() {
+    var [reqCancelBookings,setCancelBookings] = useState([]);
 
+    useEffect(()=>{
+        function data(){
+            axios.get('http://localhost:3001/admin/allcancelbooking')
+            .then((response)=>{
+                console.log("In then block");
+                console.log("==>",response);
+                setCancelBookings(response.data.reqCancelBookingData);
+                console.log("reqCancelBookings",reqCancelBookings);
+            })
+            .catch((err)=>{
+                console.log(err);
+            });
+        }
+        data();
+    },[]);
 
     return (
         <>
@@ -15,62 +33,41 @@ function CancelOrder() {
                             <thead>
                                 <tr>
                                     <th>Serial No.</th>
-                                    <th> Name</th>
-                                    <th> Service</th>
-                                    <th> Provider</th>
-                                    <th> Cancelation Date</th>
-                                    <th> Cancelation Time</th>
-                                    <th> Status</th>
+                                    <th>Customer Name</th>
+                                    <th>Service Provider Name</th>
+                                    <th>Service Name</th>
+                                    <th>Service Category</th>
+                                    <th>Service Type</th>
+                                    <th>Cancel Date</th>
+                                    <th>Cancel Time</th>
+                                    <th>Address</th>
+                                    <th>Status</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td>1</td>
-                                    <td>Mark</td>   
-                                    <td>Electrical</td>
-                                    <td>jacob</td>
-                                    <td>10/10/23</td>
-                                    <td>12:12 pm</td>
-                                    <td ><button type="button" class="btn btn-success w-100" >Refund</button></td>
-                                </tr>
-                                <tr>
-                                    <td>2</td>
-                                    <td>Jacob</td>
-                                    <td>Saloon</td>
-                                    <td>Larry</td>
-                                    <td>14/08/2023</td>
-                                    <td>1:12 pm</td>
-                                    <td><button type="button" class="btn btn-danger w-100"> Not Refundable</button></td>
+                                {
+                                    reqCancelBookings.map((data,index)=>{
+                                        console.log("data==>",data);
+                                        return(
+                                            <>
+                                            <tr>
+                                                <td>{index+1}</td>
+                                                <td>{data.CustomerName}</td>
+                                                <td>{data.ServiceProviderName}</td>
+                                                <td>{data.ServiceName}</td>
+                                                <td>{data.ServiceCategory}</td>
+                                                <td>{data.ServiceType}</td>
+                                                <td>{data.Date}</td>
+                                                <td>{data.Time}</td>
+                                                <td>{data.Address}</td>
+                                                <td>{data.Status}</td>
+                                            </tr>
+                                            </>
+                                        );
 
-
-                                </tr>
-                                <tr>
-                                    <td>3</td>
-                                    <td >Larry</td>
-                                    <td>Cleaning</td>
-                                    <td>pankaj</td>
-                                    <td>15/9/2023</td>
-                                    <td>2:10 pm</td>
-                                    <td><button type="button" class="btn btn-success w-100">Refund</button></td>
-                                </tr>
-                                <tr>
-                                    <td>4</td>
-                                    <td >pankaj</td>
-                                    <td>cook</td>
-                                    <td>anu</td>
-                                    <td>17/12/2023</td> 
-                                    <td>3:30 pm</td>
-                                    <td><button type="button" class="btn btn-danger w-100"> Not Refundable</button></td>
-                                </tr>
-                                <tr>
-                                    <td>5</td>
-                                    <td >anu</td>
-                                    <td>House Shifting</td>
-                                    <td>mark</td>
-                                    <td>20/11/2023</td>
-                                    <td>5:10</td>
-                                    <td><button type="button" class="btn btn-success w-100">Refund</button></td>
-                                </tr>
+                                    })
+                                }
+                                
                             </tbody>
                         </Table>
                         </div>
@@ -78,8 +75,6 @@ function CancelOrder() {
                     </div>
                 </div>
             </div>
-
-
         </>
     );
 }

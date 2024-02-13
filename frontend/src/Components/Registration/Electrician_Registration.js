@@ -1,24 +1,28 @@
-import elect_img from "../../images/salon.jpg";
+import elect_img from "../../images/eleimg.webp";
 import './Registration.css';
-import Swal from 'sweetalert2';
-import { useState,useEffect } from "react";
+import {useState,useEffect} from "react";
 import {useNavigate,useLocation } from "react-router-dom";
 import {requestedURLForServiceProvider} from '../../urls.js'
 import state_arr from './City_State_Array.js';
 import s_a from './City_State_Array.js';
+import Swal from "sweetalert2";
 import axios from "axios";
-
-
-function Salon_Registration() {
-
+import { useDispatch } from "react-redux";
+import ServiceProvider_Modal from "./ServiceProvider_Modal.js";
+import Cookie from "js-cookie";
+import { userData } from "../../store/userSlice.js";
+function Electrician_Registration() {
+    var data;
 	const navigate = useNavigate();
 	const location = useLocation();
-
+	const dispatch = useDispatch();
+	const [isModal, setIsModal] = useState(false);
 	const [Address,setAddress] = useState(false);
 	const [State,setStatee]=useState(false);
 	const [City,setCity]=useState(false);
 	const [providerData, setProviderData] = useState({});
-
+	const [services,setProviderServices] = useState([]);
+    
 	const handleInput = (e)=>{
 		if(e.target.type === 'file'){
 			const file  = e.target.files[0];
@@ -33,6 +37,7 @@ function Salon_Registration() {
 			else{
 				setProviderData({...providerData,[e.target.name]:e.target.value});	
 			}
+		    // validateField(e.target.name , e.target.value);
 		}
 		else{
 			setProviderData({...providerData,[e.target.name]:e.target.value});
@@ -73,7 +78,8 @@ function Salon_Registration() {
 					setStatee(true);
 				}
 			}
-			break;			
+			break;
+			
 			case 'City' : {
 				if(value==''){
 					document.getElementById("city").innerHTML = 'City Required';
@@ -90,51 +96,40 @@ function Salon_Registration() {
 	const submitData = async (e) => {
 		e.preventDefault();
         
-        console.log("After Adding Img ",providerData);
-		var checkBoxes = "";
-		checkBoxes += (document.getElementById('Primary').checked)?"Primary " : "";
-		checkBoxes += (document.getElementById('Secondary').checked)?"Secondary " : "";
-		checkBoxes += (document.getElementById('Tertiary').checked)?"Tertiary " : "";
-		console.log(checkBoxes);		
-		
+        console.log("After Adding Img ",providerData);		
 		if (Address && State && City) {		  
-		  const formData = new FormData();
-		   console.log("providerData : ",providerData);
-			for(const index in providerData){
-				console.log("providerData[index] : ",providerData[index],' index : ====================',index);
-				if(providerData[index]){
-					formData.append(index, providerData[index]); 
-				}			
-			}
-			console.log("formData : ",formData);
-		  try {
-			var result = await axios.post(requestedURLForServiceProvider + '/providerdata', formData);
-			console.log("Result : ",result);
-			if(result.status==201){
-				Swal.fire("Data Added");
-				console.log("provider data : ",result);
-				console.log("location.state.id : ",location.state.id);
-
-				if(result.data.providerData.User_id===location.state.id){
-					navigate('/Service_provider_profile');
-				}
-
-			}
-			else if(result.status==500){
-				Swal.fire('Error when add data');
-			}
-			else if(result.status==500){
-				Swal.fire('You Enter Wrong Otp');   
-			}
-
-		  } catch (err) {
-			console.error('Error submitting data:', err);
-		  }
+		  	setIsModal(true);
 		} else {
 		  console.log('Some fields are empty');
 		}
 	};
 
+	const submitData2=async()=>{
+		try {
+				var result = await axios.post(requestedURLForServiceProvider + '/providerdata');
+				console.log("Result : ",result);
+				if(result.status==201){
+					Swal.fire("Data Added");
+	
+					Cookie.set('Login_Jwt_token',result.data.token,{expires:'7d'});
+					dispatch(userData(result.data.data));
+					if(result.data.token){
+						navigate('/Service_provider_profile');
+					}
+	
+				}
+				else if(result.status==500){
+					Swal.fire('Error when add data');
+				}
+				else if(result.status==500){
+					Swal.fire('You Enter Wrong Otp');   
+				}
+	
+			  } catch (err) {
+				console.error('Error submitting data:', err);
+			  }
+	}
+	  
 	const print_state = () => {
         var option_str = document.getElementById("state");
 		console.log('option ',option_str);
@@ -148,7 +143,7 @@ function Salon_Registration() {
 			console.log('option_str in loop ',option_str);
         }
     }
-	
+
     const print_city = (e, city_id) => {
         var { name, value } = e.target;
         var state_index = e.target.selectedIndex;
@@ -163,15 +158,38 @@ function Salon_Registration() {
         }
 		handleInput(e);
     }
-
+	
 	useEffect(()=>{
-		const timeoutId = setTimeout(() => {
-            print_state();
-			setProviderData({...providerData,['User_id']:location.state.id,['Service_type']:'Salon'});
-        }, 1000);
-		return () => clearTimeout(timeoutId);
+		if(!location.search){
+			console.log("location ",location);
+			const timeoutId = setTimeout(() => {
+				print_state();
+				setProviderData({...providerData,['User_id']:location.state.id,['Service_type']:'Electrician',['pathname']:location.pathname});
+			}, 1000);
+			return () => clearTimeout(timeoutId);
+		}else{
+			const params = new URLSearchParams(location.search);
+			const status = params.get('status');
+			console.log('status : ',status);
+			if(status==="true"){
+				console.log("providerdata : ",providerData);
+                submitData2();
+			}else{
+				Swal.fire("Payment unsuccessful");
+			}
+		}
 	},[]);
 
+	useEffect(()=>{
+		const  serviceProviderServices = async(e)=>{
+			var result = await axios.get(requestedURLForServiceProvider + `/getproviderservice?Service_type=${'Electrician'}`);
+			console.log("Result Provider Services : ",result);
+			setProviderServices(result.data.services);
+			console.log("setProviderServices=>",services);
+		}
+		serviceProviderServices();
+	},[]);
+	
 	const handleClick = (value) => {
 		if (value == "electrician")
 		navigate("/Electrician_Registration",{
@@ -184,7 +202,10 @@ function Salon_Registration() {
 					id : location.state.id
 				}}); 
 		else if (value == "agency")
-			navigate("/Agency_Registration");
+			navigate("/Agency_Registration",{
+				state : {
+					id : location.state.id
+				}});
 		else if (value == "salon")
 			navigate("/Salon_Registration",{
 				state : {
@@ -197,30 +218,29 @@ function Salon_Registration() {
 				}});
 	}
 
+
 	return (
-		<section className='w-100' style={{ background: "#F9F5F4", padding: '60px 0' }} >
-			<div className="container-fluid">
+		<section className='w-100' style={{ background: "#F9F5F4", padding: '75px 0 0 0' }} >
+			<div className="container-fluid" >
 				<div className="row">
 					<div className="col-md-7 col-12" >
 						<div class="image-container">
-							<img class="image" src={elect_img} />
-						   <div className="button_div">
+						  <img class="image" src={elect_img}/>
+						  <div className="button_div">
 							<button type="submit" style={{ background: "black", color: 'white' }} className="fxt-btn" onClick={() => handleClick("electrician")}>Electrician</button><br />
 							<button type="submit" className="fxt-btn" onClick={() => handleClick("cleaner")}>Cleaner</button><br />
 							<button type="submit" className="fxt-btn" onClick={() => handleClick("salon")}>Salon</button><br />
 							<button type="submit" className="fxt-btn" onClick={() => handleClick("agency")}>Agency</button><br />
 							<button type="submit" className="fxt-btn" onClick={() => handleClick("cook")}>Cook</button><br />
 						   </div>
-						</div>
-						
+						</div>						
 					</div>
-
 					<div className="col-md-5 col-12 px-5 py-3" style={{ background: "#F9F5F4" }}>
 						<div className="maindiv" style={{background:'#FFB649'}}>
 							<form method="post" onSubmit={submitData} encType="multipart/form-data">
-								<div className="from1">
-									<h1 className="h1" >Electrician Registration</h1>
-										<div>
+								<div className="from1" >
+									<h1 className="h1">Electrician Registration</h1>
+									<div>
 										<input type="text" className="form-control mb-3" name="Address" id='address' placeholder="Enter Address" onChange={(e)=>{handleInput(e)}}/>
 										<i class="flaticon-envelope"></i>
 										<span id='Address'></span>
@@ -238,6 +258,7 @@ function Salon_Registration() {
 										<i class="flaticon-envelope"></i>
 									</div>
 								</div>
+
 								<div style={{ marginTop: "5vh" }}>
 									<h1 className="fw-normal">Your Services</h1>
 									<div className="p-2 my-2" style={{background:'white'}}>
@@ -245,48 +266,94 @@ function Salon_Registration() {
 										<div class="accordion-item">
 											<h2 class="accordion-header" id="headingOne">
 											<button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-												Accordion Item #1
+												Primary Services
 											</button>
 											</h2>
 											<div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
 											<div class="accordion-body">
-												<strong>This is the first item's accordion body.</strong> It is shown by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.
+												<ul>
+													{
+														services.map((spservices) => {
+														console.log("==>", spservices);
+
+														return spservices.Primary.map((primaryService) => (
+															
+															<li>
+																<div className='w-100 d-flex justify-content-between py-2'>
+																	<h4>{primaryService.ServiceName}</h4>
+																    <h5>{primaryService.Price}</h5>
+																</div>   
+															</li>
+														));
+														})
+													}
+												</ul>
 											</div>
 											</div>
 										</div>
 										<div class="accordion-item">
 											<h2 class="accordion-header" id="headingTwo">
 											<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-												Accordion Item #2
+											    Secondary Services
 											</button>
 											</h2>
 											<div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
 											<div class="accordion-body">
-												<strong>This is the second item's accordion body.</strong> It is hidden by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.
+												<ul>
+													{
+														services.map((spservices) => {
+														console.log("==>", spservices);
+														return spservices.Secondary.map((secondaryService) => (
+															<li>
+																<div className='w-100 d-flex justify-content-between py-2'>
+																	<h4>{secondaryService.ServiceName}</h4>
+																    <h5>{secondaryService.Price}</h5>
+																</div>   
+															</li>
+														));
+														})
+													}
+												</ul>
 											</div>
 											</div>
 										</div>
 										<div class="accordion-item">
 											<h2 class="accordion-header" id="headingThree">
 											<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-												Accordion Item #3
+											    Tertiary Services
 											</button>
 											</h2>
 											<div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample">
 											<div class="accordion-body">
-												<strong>This is the third item's accordion body.</strong> It is hidden by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.
+												<ul>
+													{
+														services.map((spservices) => {
+														console.log("==>", spservices);
+														return spservices.Tertiary.map((tertiaryService) => (
+															<li>
+																<div className='w-100 d-flex justify-content-between py-2'>
+																	<h4>{tertiaryService.ServiceName}</h4>
+																    <h5>{tertiaryService.Price}</h5>
+																</div>   
+															</li>
+														));
+														})
+													}
+												</ul>
 											</div>
 											</div>
 										</div>
 										</div>
 									</div>									
 								</div>
+
+								
 								<h1>Select Service category</h1>
                                 <div className="my-2 p-2" style={{background:'white'}}>
-								    <input type="checkbox" className="form-check-input mx-4" name="Servicecategory" value="Primary" id= 'Primary' onChange={(e)=>{handleInput(e)}}/>Primary
+									<input type="checkbox" className="form-check-input mx-4" name="Servicecategory" value="Primary" id= 'Primary' onChange={(e)=>{handleInput(e)}}/>Primary
 									<input type="checkbox" className="form-check-input mx-4" name="Servicecategory" value="Secondary" id= 'Secondary' onChange={(e)=>{handleInput(e)}}/>Secondary
 									<input type="checkbox" className="form-check-input mx-4" name="Servicecategory" value="Tertiary" id= 'Tertiary' onChange={(e)=>{handleInput(e)}}/>Tertiary 
-								</div>								
+								</div>
 								<div className="form-group">
 									<div className="fxt-content-between d-flex justify-content-end">
 										<button type="submit" className="fxt-btn-fill">Click for add services</button>
@@ -296,8 +363,14 @@ function Salon_Registration() {
 						</div>
 					</div>
 				</div>
+
 			</div>
+			{
+				(isModal)?
+					<ServiceProvider_Modal providerdata={providerData} />
+				 :''
+			}
 		</section>
 	)
 }
-export default Salon_Registration;
+export default Electrician_Registration;

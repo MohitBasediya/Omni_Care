@@ -67,7 +67,7 @@ function App() {
         />
         <Route path='/agency_list' element={
         <>
-          <Navbar />
+          <NavBar />
           <Shifting />
           <Footer />
         </>        
@@ -115,9 +115,6 @@ function App() {
         <Route path='/admin' element={<>
           <Adminlogin/>
         </>} />
-        <Route path='/admin/forgotPassword' element={
-          <ForgotPassword />
-        } />
         <Route path="/admin/dashboard" element={
           <>
             <AdminNav />

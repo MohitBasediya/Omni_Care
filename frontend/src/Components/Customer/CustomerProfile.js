@@ -1,22 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import profile from "../../images/Userprofile.png";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './Customer.css';
 import CustomerBooking from './CustomerBooking.js';
-import { useSelector,useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { Modal, ModalHeader } from 'reactstrap';
 import { requestedURL } from '../../urls.js';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate,useLocation } from 'react-router-dom';
 import axios from 'axios';
+import Cookies from 'js-cookie';
+import Swal from 'sweetalert2';
+import CustomerCancelBooking from './CustomerCancelBooking.js';
+import { userData } from '../../store/userSlice.js';
 const CustomerProfile = () => {
-  const [isupdatemodel,setIsUpdateModel]=useState(false);
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const userData = useSelector(state=>state.userSlice.user_Data);
-  const [updatedUserData,setUpdatedUserData] = useState(userData);
-  console.log("Customer Profile =>",updatedUserData);
-  const [customercomponent,setCustomerComponent]=useState('Booking');
 
+  const dispatch = useDispatch();
+  const navigate = useNavigate(); 
+  const location = useLocation();
+  const [updatedUserData,setUpdatedUserData] = useState({});
+  const [isupdatemodel,setIsUpdateModel]= useState(false);
+  const [reviewmodel,setreviewModel]= useState(false);
+  const [AddReview,setReviewData] = useState("");
+  const [customercomponent,setCustomerComponent] = useState('');
+  const [billmodel,setBillModel]= useState(false);
+  const [billdata,setBillData] = useState({});
   const handleInput = (event)=>{
     const {name,value} = event.target;
     setUpdatedUserData({
@@ -25,10 +32,16 @@ const CustomerProfile = () => {
     });
   }
 
+  const handleInput1 = (event)=>{
+    const {name,value} = event.target;
+    setReviewData(value);
+  }
+
   const handleSubmit = async(event)=>{
     event.preventDefault();
     try{
       console.log("updatedUserData=>",updatedUserData);
+
       var result = await axios.post(requestedURL + "/updateuser",{updatedData : updatedUserData});
       console.log("Result Updated Data=>",result);
 
@@ -41,6 +54,85 @@ const CustomerProfile = () => {
       console.log(err);
     }
   }
+  const handleSubmit1 = async(event)=>{
+    event.preventDefault();
+    try{
+      const data={
+        review:AddReview,
+        userId:updatedUserData._id
+      }
+      console.log("Add Review=>",AddReview);
+
+      var result = await axios.post(requestedURL + "/AddReview",data);
+      console.log("Result Updated Data=>",result);
+
+      if(result.status==201){
+        setReviewData(AddReview);
+        setreviewModel(false);
+        navigate('/customer_profile');
+      }
+    }catch(err){
+      console.log(err);
+    }
+  }
+    
+  const submitBooking =async()=>{
+    try{
+      console.log("submit booking");
+      var result = await axios.post(`${requestedURL}/confirmbooking`);
+      if(result.status === 201){
+        Swal.fire("Booking confirmed");
+        setBillData(result.data.billdata);
+        navigate('/customer_profile');
+      }else if(result.status ===203){
+        Swal.fire("Error when confirm booking");
+      }else if(result.status ===500 ){
+        Swal.fire("Error while confirm booking");
+      }
+    }catch(error){
+      console.log("error ",error);
+      Swal.fire("Error while request sent to backend")
+    }
+  }
+    useEffect(()=>{
+      var data=async()=>{
+            var cookie_token= Cookies.get('Login_Jwt_token');
+          if(cookie_token){
+            try{
+              var result = await axios.post(requestedURL+'/awt_login',{token:cookie_token});                                     
+                if(result.status==201){
+                  console.log("result.data.payload.user.data : ",result.data.payload.user.data);
+                  setUpdatedUserData(result.data.payload.user.data); 
+                  dispatch(userData(result.data.payload.user.data));
+                  setCustomerComponent('Booking');
+                  if(location.search){
+                    const params = new URLSearchParams(location.search);
+                    const status = params.get('status');
+                     if(status==='true'){
+                        submitBooking();
+                     }else{
+                       Swal.fire(
+                        "Payment Unsuccessful"
+                       )
+                     }
+                  }
+                }else
+                {                        
+                    Swal.fire("Login Yourself");
+                    navigate('/');
+                }             
+
+            }catch(err){
+                console.log("Error while dealing with login in login component",err);
+            }                
+          }
+          else{
+            Swal.fire("Login yourself");
+            navigate('/');
+          }
+        }
+        data();
+    },[]);
 
   return (
     <>
@@ -52,10 +144,10 @@ const CustomerProfile = () => {
                 </figure>
               </div>
             </section>
-            <h3 className='text-dark text-center' style={{ paddingLeft: "1rem" }}>Andrew Anderson</h3>
+            <h3 className='text-dark text-center' style={{ paddingLeft: "1rem" }}>{updatedUserData.Name}</h3>
       </div>
       <div className="container-fluid">
-        <div className="row">
+        <div className="row justify-content-between">
           <div className="col-sm-12 col-md-6 col-lg-2 p-4">
             <div className="work_skills ">
               <div className="profile-tab-nav ">
@@ -71,6 +163,11 @@ const CustomerProfile = () => {
                   </a>
                   </li>
                   <li>
+                  <a className="nav-link" id="editprofile-tab" onClick={()=>{setCustomerComponent('Cancel')}} data-bs-toggle="pill" href="#password" role="tab" aria-controls="password" aria-selected="false">
+                   Cancel Booking 
+                  </a>
+                  </li>
+                  <li>
                   <a className="nav-link" id="password-tab" onClick={()=>{setIsUpdateModel(true)}} data-bs-toggle="pill" href="#security" role="tab" aria-controls="security" aria-selected="false">
                     Update Profile
                   </a>
@@ -81,7 +178,7 @@ const CustomerProfile = () => {
                   </a>
                   </li>
                   <li>
-                  <a className="nav-link " id="overview-tab" data-bs-toggle="pill" href="#application" role="tab"  aria-controls="application" aria-selected="false">
+                  <a className="nav-link " id="overview-tab" data-bs-toggle="pill" onClick={()=>{setreviewModel(true)}} href="#application" role="tab"  aria-controls="application" aria-selected="false">
                     Review Us
                   </a>
                   </li>
@@ -106,7 +203,7 @@ const CustomerProfile = () => {
                       </figure>
                     </div>
                   </section>
-                  <h4 className='text-light' style={{ paddingLeft: "1rem" }}>Andrew Anderson</h4>
+                  <h4 className='text-light' style={{ paddingLeft: "1rem" }}>{updatedUserData.Name}</h4>
                 </div>
                 <div className='p-1'>
                 <button type="button" className="btn text-reset bg-light" data-bs-dismiss="offcanvas" aria-label="Close">
@@ -117,13 +214,22 @@ const CustomerProfile = () => {
              </div>
             <div className="offcanvas-body text-light">
               <div className='container-fluid'>
-                 <p className='fs-3 fw-lighter' style={{marginLeft:'-20px',color:'black'}}>Account Detail</p>
+                 <p className='fs-3 fw-lighter' style={{marginLeft:'-20px',color:'white'}}>Account Detail</p>
                  <div className='acc-detail text-light'>
-                   <h5 className='py-2'>andrewanderson@gmail.com</h5>
-                   <h5 className='pb-2'>Male</h5>
-                   <h5 className='pb-2'>7898061522</h5>    
-                   <h5 className='pb-2'>No of Bookings :- 10</h5>    
-                   <h5>No of Transactions :- 10</h5>    
+                 <hr></hr>
+
+                   <h5 className='p-3 text-light'>{updatedUserData.Email}</h5>
+                    <hr></hr>
+                   <h5 className='p-3 text-light' >{updatedUserData.Gender}</h5>
+                    <hr></hr>
+                   <h5 className='p-3 text-light'>{updatedUserData.Contact_No}</h5>
+                    <hr></hr>
+                   <h5 className='p-3 text-light'>No of Bookings :- 10</h5>  
+                    <hr></hr>
+                   <h5 className='p-3 text-light'>No of Transactions :- 10</h5>   
+                   <hr></hr>
+
+
                  </div>
               </div>              
             </div>
@@ -132,65 +238,15 @@ const CustomerProfile = () => {
           {
              (customercomponent==='Booking')
              ?
-             <CustomerBooking/>
+             <CustomerBooking />
              :
-             (customercomponent==='Transaction')
+             (customercomponent==='Cancel')
              ?
-             ''
+             <CustomerCancelBooking />
              :
              ''
         }
-          
-          <div className="col-sm-12 col-md-6 col-lg-3">
-            <div id="currentservices">
-              <div className="">
-                <div className="row">
-                  <div className="col-12">
-                    <h4 className='py-2 fw-bold px-3'>Current Services </h4>
-                  </div>
-                  <div className="col-3">
-                    <img src={profile} id="serviceimg" alt="" />
-                  </div>
-                  <div className="col-6">
-                    <p id="servicename">Hair cut & shining</p>
-                    <p id="servicename1">it's amazing</p>
-                  </div>
-                  <div className="col-3">
-                    <p>
-                      150 &nbsp;<i className="fa-solid fa-indian-rupee-sign"></i>
-                    </p>
-                  </div>
-                  <div className="col-3">
-                    <img src={profile} id="serviceimg" alt="" />
-                  </div>
-                  <div className="col-6">
-                    <p id="servicename">Hair cut & shining</p>
-                    <p id="servicename1">it's amazing</p>
-                  </div>
-                  <div className="col-3">
-                    <p>
-                      150 &nbsp;<i className="fa-solid fa-indian-rupee-sign"></i>
-                    </p>
-                  </div>
-                  <div className="col-3">
-                    <img src={profile} id="serviceimg" alt="" />
-                  </div>
-                  <div className="col-6">
-                    <p id="servicename">Hair cut & shining</p>
-                    <p id="servicename1">it's amazing</p>
-                  </div>
-                  <div className="col-3">
-                    <p>
-                      150 &nbsp;<i className="fa-solid fa-indian-rupee-sign"></i>
-                    </p>
-                  </div>
-                  <div className='col-12 p-3'>
-                    <button className='btn d-block w-100 mx-auto btn-dark text-light'>See All</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+
          </div>
         </div>        
 
@@ -220,6 +276,27 @@ const CustomerProfile = () => {
                </div>
             </div>
         </Modal>
+ 
+        <Modal isOpen={reviewmodel} id='reviewmodel'>
+            <ModalHeader toggle={()=>{setreviewModel(false)}}>Add Review</ModalHeader>
+            <div className='container p-2'>
+               <div className='row'>
+                  <form method='post' onSubmit={handleSubmit1}>
+
+                      <div className='w-100 p-2'>
+                         <label className='text-dark py-1 px-2 fs-5'>Your Review</label>
+                         <textarea className='form-control' placeholder='Enter Your Review' name="review"   onChange={handleInput1}></textarea>
+                      </div>
+                      <div className='w-100 py-2 px-3 d-flex justify-content-end'>
+                         <button type='submit' className='btn btn-dark text-light mx-2'>Add Review</button>
+                         <input type='reset' className='btn btn-danger text-light mx-2' onClick={()=>{setreviewModel(false)}} value='Cancel'/>
+                      </div>
+                      
+                  </form>
+               </div>
+            </div>
+        </Modal>
+        
     </>
   );
 };

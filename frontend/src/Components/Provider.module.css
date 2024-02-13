@@ -1,0 +1,213 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Poppins", sans-serif;
+}
+
+.sidebar {
+    position: fixed;
+    z-index: 100;
+    left: 0;
+    width: 100px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    transition: width 0.5s ease;
+}
+
+.sidebar:hover {
+    position: fixed;
+    z-index: 100;
+    width: 300px;
+    /* backdrop-filter: blur(1px);  */
+    background: linear-gradient(to right, #000, transparent); 
+    color: #fff;
+}
+
+
+
+.sidebar .links {
+    list-style: none;
+    margin: auto;
+    overflow-y: auto;
+    scrollbar-width: none;
+    height: calc(100% - 140px);
+}
+
+.sidebar .links::-webkit-scrollbar {
+    display: none;
+}
+
+.links li .linkTag {
+    display: flex;
+    border-radius: 4px;
+    align-items: center;
+    overflow: hidden;
+    transition: transform 0.3s ease, background 0.3s ease, color 0.3s ease; /* Add transition property */
+    
+}
+.links li {
+    transition: transform 0.3s ease, background 0.3s ease, color 0.3s ease; /* Add transition property */
+}
+.linkTag:hover{
+    cursor: pointer;
+    background: linear-gradient(to right, #000, transparent); 
+    color: #fff;
+    transform: scale(1.2);
+}
+/* .links li:hover, .links li #linkTag a:hover, .links li #linkTag span:hover {
+    cursor: pointer;
+    background: linear-gradient(to right, #000, transparent); 
+    color: #fff;
+    transform: scale(1.1);
+    
+} */
+
+.links li .linkTag span {
+    padding: 12px 10px;
+}
+
+.links li .linkTag a {
+    padding: 10px;
+    color: #fff;
+    display: none;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.links li a {
+    text-decoration: none;
+}
+
+.links li .linkTag span {
+    color: #e4d8d8;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.sidebar:hover .links li .linkTag a {
+    display: block;
+}
+
+@media (max-width: 576px) {
+    .sidebar {
+        display: flex;
+        position: fixed;
+        bottom: 0;
+        height: 55px;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        margin: auto;
+    }
+
+    .sidebar .links {
+        display: flex;
+        list-style: none;
+        margin: auto;
+        padding: 2px;
+        overflow-x: auto;
+        scrollbar-width: none;
+        height: calc(100% - .5vh);
+    }
+
+    .links li .linkTag span {
+        color: #e4d8d8;
+        font-weight: 500;
+        white-space: nowrap;
+        font-size: 22px;
+        border-radius: 30px;
+    }
+
+    .sidebar:hover .links li .linkTag a {
+        display: none;
+    }
+
+    .sidebar:hover {
+        width: 100%;
+    }
+}
+
+
+
+
+/* sidebar------------------------------------------- */
+
+
+
+  
+  .menuParent {
+    /* background: #161414; */
+    color: #ffffff;
+    text-align: left;
+  }
+
+  .menuParent * {
+    margin: 0;
+    padding: 0;
+  }
+
+  .menuParent li {
+    list-style: none;
+  }
+
+  .menuParent li.active>ul {
+    display: block;
+  }
+
+  .menuParent>ul>li>a {
+    position: relative;
+    display: block;
+    /* background: #161414; */
+    background-color:  #484545;
+    margin: 4px;
+    padding: 0 30px;
+    font-size: 16px;
+    line-height: 3.3  ;
+    color: #ffffff;
+    text-decoration: none;
+    width: 100%;
+    border-radius: 5px;
+  }
+
+  .menuParent>ul>li>a .fa {
+    margin-right: 8px;
+  }
+
+  .menuParent ul ul li a {
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 16px;
+    line-height: 4;
+    display: block;
+    padding: 0 30px;
+    position: relative;
+  }
+
+  .menuParent a:not(:only-child):after {
+    position: absolute;
+    right: 20px;
+    content: "\f067";
+    top: -6px;
+    font-size: 20px;
+    font-family: FontAwesome;
+  }
+
+  .menuParent .active>a:not(:only-child):after {
+    content: "\f068";
+    top: -6px;
+    font-size: 20px;
+    font-family: FontAwesome;
+  }
+
+  .myDashboardCard {
+    border-radius: 10px;
+    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.4);
+  }
+
+  .dashboardLinks:hover {
+    border-bottom: 1px solid white;
+    padding-bottom: 2px;
+  }

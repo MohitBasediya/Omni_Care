@@ -5,12 +5,14 @@ import UserReview from './UserReview.js';
 import AddServices  from './AddServices.js';
 import CancelOrder  from './CancelOrder.js';
 import Order  from './Order.js';
+import Services from "./Service.js";
 import Customer from './Customer.js';
 import React, { useState } from "react";
 import axios from "axios";
 import { memo } from "react";
 import { adminURl } from "../../urls";
 import Swal from "sweetalert2";
+import Booking from './Booking.js';
 import "./styles.css";
 
 function AdminNav() {
@@ -24,6 +26,7 @@ function AdminNav() {
     }
     const addServiceType = async (e) => {
         e.preventDefault();
+        console.log('service type : ',serviceType);
         try {
             if (serviceType === '') {
                 alert('field is empty');
@@ -39,6 +42,12 @@ function AdminNav() {
                         timer: 2000
                     });
                     handleClose();
+                }
+                else if(response.status===203){
+                    Swal.fire(`${serviceType} service is already exist`);
+                }
+                else if(response.status===500){
+                    Swal.fire(`${response.data.error}`);
                 }
             }
         } catch (err) {
@@ -80,6 +89,11 @@ function AdminNav() {
                                     </Link>
                                 </li>
                                 <li className="nav-item">
+                                    <Link className="nav-link" onClick={()=>{setAdminComponent('Services')}}>
+                                        <i className="bi bi-bar-chart"></i> Services
+                                    </Link>
+                                </li>
+                                <li className="nav-item">
                                     <Link className="nav-link" onClick={()=>{setAdminComponent('Customer')}}>
                                         <i className="bi bi-bar-chart"></i> Customer
                                     </Link>
@@ -87,7 +101,7 @@ function AdminNav() {
                                 <li className="nav-item">
                                     <Link className="nav-link" onClick={()=>{setAdminComponent('Providers')}}>
                                         <i className="bi bi-chat"></i> Providers
-                                        <span className="badge bg-soft-primary text-primary rounded-pill d-inline-flex align-items-center ms-auto">6</span>
+                                        {/* <span className="badge bg-soft-primary text-primary rounded-pill d-inline-flex align-items-center ms-auto">6</span> */}
                                     </Link>
                                 </li>
                                 <li className="nav-item">
@@ -133,12 +147,7 @@ function AdminNav() {
                                     </div>
                                     <div className="col-sm-6 col-12 text-sm-end">
                                         <div className="mx-n1">
-                                            <Link to="#" className="btn d-inline-flex btn-sm btn-neutral border-base mx-1">
-                                                <span className=" pe-2">
-                                                    <i className="bi bi-pencil"></i>
-                                                </span>
-                                                <span>Edit</span>
-                                            </Link>
+                                           
                                             <Link to="#" className="btn d-inline-flex btn-sm mx-1 text-dark" style={{ background: '#FFB649' }}>
                                                 <span className=" pe-2">
                                                     <i className="bi bi-plus"></i>
@@ -278,14 +287,17 @@ function AdminNav() {
                 (admincomponent==='homedata')?
                 <AddServices/>
                 :
+                (admincomponent==='Services')?
+                <Services/>
+                :
                 (admincomponent==='Customer')?
                 <Customer />
                 :
                 (admincomponent==='UserReview')?
                 <UserReview />
                 :
-                (admincomponent==='CancelOrder')?
-                <CancelOrder />
+                (admincomponent==='Booking')?
+                <Booking />
                 :
                 (admincomponent==='Providers')?
                 <ServiceProvider/>

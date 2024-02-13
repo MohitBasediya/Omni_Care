@@ -27,7 +27,7 @@ function AddServices() {
     const handleaddclick = () => {
         setinputList([...inputList, {}]);
     }
-
+    
     useEffect(() => {
         setTimeout(fetchServiceType, 1000);
     }, []);
@@ -56,6 +56,7 @@ function AddServices() {
             }
             console.log('service : ', inputList);
         }
+        console.log("inputList ==== ",inputList);
         const formData= new FormData();
         for (const obj of inputList) {
             for (const key in obj) {
