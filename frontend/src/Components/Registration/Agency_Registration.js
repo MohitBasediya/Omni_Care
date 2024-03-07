@@ -364,8 +364,8 @@ const [StateData, setStateData] = useState({
                     if (result.status === 201) {
                         Swal.fire("Data Added");
                         setIsModal(true);
-                        setAgencyId(result.data.data[0]._id);
-                        Cookie.set("Login_Jwt_token",result.data.token);
+                        setAgencyId(result.data.data._id);
+                        Cookie.set("Login_Jwt_token",result.data.token,{expires:7});
                         data=[...result.data.data];
                     }
                     else if (result.status == 500) {
@@ -474,51 +474,47 @@ const [StateData, setStateData] = useState({
                                     <h1 className="h1" >Agency Registration</h1>
                                     <div>
                                         <input type="text" className="form-control mb-3" name="Address" id='address' placeholder="Enter Address" onChange={(e) => { handleInput(e) }} />
-                                        <i class="flaticon-envelope"></i>
                                         <span id='Address'></span>
                                     </div>
                                     <div>
                                         <select type="text" className="form-control mb-3" name="State" id="state" onChange={(e) => { print_city(e, 'city') }}></select>
-                                        <i class="flaticon-padlock"></i>
                                     </div>
                                     <div >
                                         <select type="text" className="form-control mb-3" name="City" id="city" onChange={(e) => { handleInput(e) }}></select>
-                                        <i class="flaticon-envelope"></i>
                                     </div>
-                                    <div >
+                                    <div>
+                                        <label>Aadhaar Image</label>
                                         <input type="file" className="form-control mb-3" name="aadharimg" placeholder="Adhaar Image" onChange={(e) => { handleInput(e) }} />
-                                        <i class="flaticon-envelope"></i>
+                                    </div>
+                                    <div>
+                                        <label>Profile Image</label>
+                                        <input type="file" className="form-control mb-3" name="profileimg" placeholder="Adhaar Image" onChange={(e) => { handleInput(e) }} />
                                     </div>
                                 </div>
                                 <div style={{ marginTop: "5vh" }}>
                                     <h1 className="fw-bold">Agency Detail</h1>
                                     <div >
                                         <input type="text" className="form-control mb-3" name="AgencyName" id='agencyname' placeholder="Agency Name" onChange={(e) => { handleInput(e) }} />
-                                        <i class="flaticon-envelope"></i>
                                         <span id='agencyName'></span>
                                     </div>
                                     <div >
                                         <input type="text" className="form-control mb-3" name="OwnerName" id='ownername' placeholder="Owner Name" onChange={(e) => { handleInput(e) }} />
-                                        <i class="flaticon-envelope"></i>
                                         <span id='ownerName'></span>
                                     </div>
                                     <div >
                                         <input type="text" className="form-control mb-3" name="AgencyContact" id='contactno' placeholder="Agency Contact Number" onChange={(e) => { handleInput(e) }} />
-                                        <i class="flaticon-envelope"></i>
                                         <span id='agencyContact'></span>
                                     </div>
                                     <div>
                                         <input type="text" className="form-control mb-3" name="GSTNumber" id='gstno' placeholder="GST Number" onChange={(e) => { handleInput(e) }} />
-                                        <i class="flaticon-envelope"></i>
                                         <span id='gstNo'></span>
                                     </div>
-                                    <div >
+                                    <div>
+                                        <label>Agency Image</label>
                                         <input type="file" className="form-control mb-3" name="AgencyImg" id='agencyimg' placeholder="Upload Agency Image" onChange={(e) => { handleInput(e) }} />
-                                        <i class="flaticon-envelope"></i>
                                     </div>
                                     <div>
                                         <textarea type="text" row='3' col='10' className="form-control mb-3" name="AgencyDetails" id='agencydetails' placeholder="Enter Your Agency Details" onChange={(e) => { handleInput(e) }}></textarea>
-                                        <i class="flaticon-envelope"></i>
                                         <span id='agencyDetails'></span>
                                     </div>
                                 </div>

@@ -18,6 +18,7 @@ export const upload1= multer({
 }).fields([
     { name: 'aadharimg', maxCount: 1},
     { name: 'AgencyImg', maxCount: 1},
+    { name: 'profileimg', maxCount: 1}
 ]);
 
 export const upload2 = multer({

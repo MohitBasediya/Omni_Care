@@ -65,7 +65,7 @@ body {
   color: #000;
   font-size: 18px;
 }
-#nav-btn{
+#dropdownMenuButton1{
   width: 80%;
   padding: 10px;
   border-radius: 10px;
@@ -149,4 +149,9 @@ body {
     margin-right: 10px;
   }
 }
-
+.bg-yellow2{
+  transition: 1s;
+}
+.bg-yellow2:hover{
+  background-color: #FFC737;
+}

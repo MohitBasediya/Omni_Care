@@ -1,5 +1,5 @@
 import { useState,useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Login from './Home/Login';
 import logo from '../images/OmniCareLogo.png';
 import Cookie from 'js-cookie';
@@ -13,6 +13,7 @@ export default function NavBar() {
     const [isLogin,setIsLogin] = useState(false);
     const [navItem,setNavItem] = useState();
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     var role='';
     const logout=()=>{
         Cookie.set('Login_Jwt_token','');
@@ -48,7 +49,7 @@ export default function NavBar() {
                     </button>
                     <ul className='dropdown-menu dropdown-menu-dark'>
                         <li>
-                            <Link className='dropdown-item' to={(result.data.payload.user.role==='Customer')?'/customer_profile':'/Service_provider_profile'}>Profile</Link>
+                            <Link className='dropdown-item' to={(result.data.role==='Customer')?'/customer_profile':'/Service_provider_profile'}>Profile</Link>
                         </li>
                         <li>
                             <a className='dropdown-item' style={{cursor:'pointer'}} onClick={()=>{logout()}}>Log Out</a>

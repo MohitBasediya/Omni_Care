@@ -11,10 +11,11 @@ import 'swiper/css/pagination';
 import 'swiper/css/navigation';
 import './Home.css';
 
-export default function OurTeam() {
+export default function OurServices() {
     var navigate = useNavigate();
 
     const handleButton1 = (category) => {
+        console.log('helo ',category)
         if(category==='Shifting Agency'){
             navigate('/agency_list',{
                 state: {
@@ -61,7 +62,8 @@ export default function OurTeam() {
                     }
                 }}
                 modules={[ Navigation]}
-                className="mySwiper mb-4 px-5">
+                className="mySwiper mb-4 px-5"
+            >
                 <SwiperSlide>
                     <div className='card border-0' style={{ background: '#F9F5F4' }}>
                         <div className='card-img-top p-4'>
@@ -132,7 +134,7 @@ export default function OurTeam() {
                         </div>
                     </div>
                 </SwiperSlide>
-            </Swiper>
+            </Swiper >
         </section>
     )
 }

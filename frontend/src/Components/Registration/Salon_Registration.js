@@ -122,7 +122,7 @@ function Salon_Registration() {
 					console.log("provider data : ",result);
 					console.log("location.state.id : ",location.state.id);
 	
-					Cookie.set('Login_Jwt_token',result.data.token,{expires:'7d'});
+					Cookie.set('Login_Jwt_token',result.data.token,{expires:7});
 					dispatch(userData(result.data.data));
 					if(result.data.token){
 						navigate('/Service_provider_profile');
@@ -247,21 +247,22 @@ function Salon_Registration() {
 								<div className="from1">
 									<h1 className="h1" >Salon Registration</h1>
 										<div>
-										<input type="text" className="form-control mb-3" name="Address" id='address' placeholder="Enter Address" onChange={(e)=>{handleInput(e)}}/>
-										<i class="flaticon-envelope"></i>
-										<span id='Address'></span>
-									</div>
+											<input type="text" className="form-control mb-3" name="Address" id='address' placeholder="Enter Address" onChange={(e)=>{handleInput(e)}}/>
+											<span id='Address'></span>
+									    </div>
 									<div>
 										<select type="text"  className="form-control mb-3" name="State" id="state" onChange={(e) => { print_city(e, 'city') }}></select>
-										<i class="flaticon-padlock"></i>
 									</div>
 									<div >
 										<select type="text" className="form-control mb-3"  name="City" id="city" onChange={(e)=>{handleInput(e)}}></select>
-										<i class="flaticon-envelope"></i>
 									</div>
-									<div >
+									<div>
+										<label>Aadhar Card Image</label>
 										<input type="file" className="form-control mb-3" name="aadharimg" placeholder="Adhaar Image" onChange={(e)=>{handleInput(e)}}/>
-										<i class="flaticon-envelope"></i>
+									</div>
+									<div>
+										<label>Profile Image</label>
+										<input type="file" className="form-control mb-3" name="profileimg" placeholder="Adhaar Image" onChange={(e)=>{handleInput(e)}}/>
 									</div>
 								</div>
 

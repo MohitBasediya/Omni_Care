@@ -39,8 +39,7 @@ function Home(){
     const validateField=(name,value)=>{
         switch(name){
             case 'Name':{
-                console.log('name in validation : ',value);
-                var reg= /^[A-Za-z\s]+$/;
+                var reg = /^[A-Za-z\s]+$/;
                 if(value.trim()==""){
                    document.getElementById('username').style.color='red';
                    document.getElementById('Username').innerHTML='Name Required';
@@ -58,6 +57,7 @@ function Home(){
                 }
             }
             break;
+            
             case 'Email':{
                 var reg = /^\w+([\.-])?\w*@[a-z]*([\.][a-z]{2,3})+$/;
                 if(value.trim()===""){
@@ -201,7 +201,7 @@ function Home(){
             if(result.status===201){
                 console.log('isoken in Home Component ',istoken);
                 setIstoken(true);
-                dispatch(userData(result.data.payload.user.data));
+                dispatch(userData(result.data.data));
             }else{
                 console.log('result in else ',result);
                 setIstoken(false);

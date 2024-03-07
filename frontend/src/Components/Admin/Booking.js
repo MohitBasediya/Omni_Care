@@ -1,6 +1,4 @@
-import Table from 'react-bootstrap/Table';
 import axios from 'axios';
-//import { adminURl } from '../../urls';
 import { useEffect, useState } from 'react';
 
 function AllBooking(){
@@ -10,10 +8,7 @@ function AllBooking(){
         function data(){
             axios.get('http://localhost:3001/admin/allbooking')
             .then((response)=>{
-                console.log("In then block");
-                console.log("==>",response);
                 setUserBookingData(response.data.reqBookingsData);
-                console.log("reqUserBookingData=>",reqUserBookingData);
             })
             .catch((err)=>{
                 console.log(err);

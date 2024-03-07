@@ -3,6 +3,7 @@ import randomstring from "randomstring";
 import { mailer } from "./mailer.js";
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { providerBankDetails } from "../module/ProviderBankDetails.js";
 import { Booking } from "../module/BookingModel.js";
 const maxAge = 3 * 24 * 60 * 60;
 const SECRET_KEY = "crypto.randomBytes(32).toString('hex')";
@@ -12,7 +13,11 @@ import serviceModel from "../module/ServiceModel.js";
 import { serviceprovider } from '../module/ServiceProviderDetail.js';
 import CookModel from "../module/CookModel.js";
 import { reviews } from "../module/Review.js";
-
+import stripe from 'stripe';
+import dotenv from 'dotenv';
+import { payment_model } from "../module/Payment_Module.js";
+dotenv.config();
+var providerdata,session;
 
 export const AdminloginController = async (request, response) => {
     const { Email, Password } = request.body;
@@ -567,4 +572,110 @@ export const UserReview = async(req,res,next)=>{
         console.log(error)
     }   
 
+}
+
+export const CardData = async(req,res)=>{
+    try {         
+          const Customerdata= await registration.find({User_Role:'Customer'});
+          const result1=Customerdata.length;
+          const Servicedata= await registration.find({User_Role:'Service Provider'});
+          const result2=Servicedata.length; 
+
+        const data ={
+            result1:result1,
+            result2:result2
+        }              
+        return res.status(201).json({data:data});        
+        
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({message:error});
+    }
+}
+
+export const providerPaymentRequest = async(req,res)=>{
+    try{
+        var result = await providerBankDetails.find({paymentStatus:'Pending'});
+        if(result.length>0){
+            for(var i=0;i<result.length;i++){
+                var providerdata= await serviceprovider.findOne({User_id:result[i].providerId},{Wallet:1,_id:0});
+                providerdata={...providerdata.toObject(),...result[i].toObject()};
+                result[i]=providerdata;
+                console.log("result : ",result[i]);
+            }
+            res.status(201).json({resultPayment:result});
+        }else{
+            res.status(203).json({message:'No Request find'});
+        }
+    }catch(error){
+        console.log("error : ",error);
+        res.status(500).json({message:'error while fetching data'});
+    }
+}
+export const providerPayment = async(req, res) => {
+    providerdata = req.body.data;
+    const pathname = req.body.pathname; 
+    console.log("==>In providerPayment", providerdata);
+    try {
+        session = await stripeInstance.checkout.sessions.create({
+            payment_method_types: ['card'],
+            line_items: [{
+                price_data: {
+                    currency: 'INR',
+                    product_data:  {
+                        name: providerdata.providerName,
+                    },      
+                    unit_amount: providerdata.Wallet_amount,
+                },
+                quantity: 1,
+            }],
+            mode: 'payment',
+            success_url: 'http://localhost:3000${pathname}?status=true',
+            cancel_url: 'http://localhost:3000${pathname}?status=false',  
+        });
+        console.log("session : ",session);
+        res.status(201).json({ id: session.id });
+    } catch (error) {
+        console.error('Error creating Stripe session:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+}
+
+export const providerPaymentDataSubmit = async(req,res)=>{
+    try{
+        const role = await registration.findOne({User_Role : 'Admin'});
+        console.log("role=>",role);
+        
+
+        var date = new Date().getDate() + '-' + new Date().getMonth() + '-' + new Date().getFullYear();
+        var obj = {
+            User_id : providerdata.providerId,
+            Amount  : providerdata.Wallet_amount,
+            Date    : date,
+            Trannsaction_id : session.id,
+            Booking_id : role._id
+        }
+        var data = await payment_model.create(obj);
+        console.log("Data =>",data);
+
+        var result = await providerBankDetails.updateOne({_id : providerdata._id},
+            {
+                $set : {
+                    paymentStatus : "Completed"
+                }
+            }); 
+        console.log('data ',providerdata);
+
+        var result2= await serviceprovider.updateOne({ User_id: providerdata.providerId},
+            { $set: { Wallet: 0 } });
+        
+        if(result2.acknowledged){
+            res.status(201).json({message:'data updated'});
+        }
+        else{
+            res.status(203).json({message:'data not updatrd'})
+        }
+    }catch(error){
+        console.log("Error :",error);
+    }
 }

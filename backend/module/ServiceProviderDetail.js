@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 var Service_provider_schema=mongoose.Schema({
     User_id:{
-        type:String,
+        type:mongoose.Schema.ObjectId,
         required:true
     },
     Address:{
@@ -17,38 +17,58 @@ var Service_provider_schema=mongoose.Schema({
         required:true
     },
     Service_type:{
-        type:String,
+        type:String
     },
     Service_category:{
-        type:String,
+        type:String
     },
     Aadhar_image:{
         type:String,
         required:true
     },
     Account_no:{
-        type:Number,
+        type:Number
     },
     Bank_Name:{
-        type:String,
+        type:String
     },
     Agency_Name:{
-        type:String,
+        type:String
     },
     Owner_Name:{
-        type:String,
+        type:String
     },
     Contact_No:{
-        type:Number,
+        type:Number
     },
     Agency_img :{
-        type:String,
+        type:String
     },
     GSTNumber :{
-        type:String,
+        type:String
     },
     AgencyDetials :{
+        type:String
+    },
+    Profile_img:{
+        type:String
+    },
+    Complete_Booking:[{
+        booking_id:{
+            type:mongoose.Schema.ObjectId
+        },
+        Price:{
+            type:Number
+        }
+       }
+    ],
+    Wallet:{
+            type:Number,
+            default:0
+    },
+    ProfileImg:{
         type:String,
+        required:true
     }
 });
 

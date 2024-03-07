@@ -9,6 +9,7 @@ import { Agency_Booking } from "../module/AgencyBooking.js";
 import stripe from 'stripe';
 import dotenv from 'dotenv';
 import { reviews } from "../module/Review.js";
+import { providerBankDetails } from "../module/ProviderBankDetails.js";
 const SECRET_KEY = "crypto.randomBytes(32).toString('hex')";
 const maxAge = 10 * 24 * 60 * 60;
 var spData = {};
@@ -18,14 +19,14 @@ const expiryTime = {
 }
 dotenv.config();
 let providerData;
-var aadharImg,agencyImg;
+var aadharImg,agencyImg,profileimg;
 const { STRIPE_SECRET_KEY } = process.env;
 const stripeInstance = stripe(STRIPE_SECRET_KEY);
 export const providerpayment=async(req,res)=>{
     providerData=req.body;
-    console.log('req.files ',req.files);
-    aadharImg = req.files['aadharimg'][0].originalname;
+    aadharImg = (req.files['aadharimg'])?req.files['aadharimg'][0].originalname:'';
     agencyImg = (req.files['AgencyImg'])?req.files['AgencyImg'][0].originalname:'';
+    profileimg = (req.files['profileimg'])?req.files['profileimg'][0].originalname:'';
     try {
         const userData=await registration.findOne({_id:providerData.User_id});
         const session = await stripeInstance.checkout.sessions.create({
@@ -70,16 +71,16 @@ export const ProviderDataInsert = async(req,res)=>{
         Agency_Name:(providerData.AgencyName)?providerData.AgencyName:'',
         Owner_Name:(providerData.OwnerName)?providerData.OwnerName:'',
         Contact_No:(providerData.AgencyContact)?providerData.AgencyContact:'',
-        GSTNumber:(spData.GSTNumber)?providerData.GSTNumber:'',
+        GSTNumber:(providerData.GSTNumber)?providerData.GSTNumber:'',
         AgencyDetials:(providerData.AgencyDetails)?providerData.AgencyDetails:'',
         Agency_img : agencyImg,
+        ProfileImg:profileimg
     });
     payload.user={
-        data:[user,provider],
+        data:user,
         role:'Service Provider'
     }
     var token=jwt.sign(payload, SECRET_KEY, expiryTime);    
-    console.log(token);
     if(provider){
         res.status(201).json({token:token,data:payload.user.data,role:payload.user.role}); 
     }else{        
@@ -354,7 +355,7 @@ export const acceptRequest= async(req,res)=>{
             {
                 $set: {
                     'BookingData.$.Status': 'Accepted',
-                    'BookingData.$.Service_provider_id': updatedUserData._id
+                    'BookingData.$.Service_provider_id': updatedUserData.User_id
                 }
             },
             { new: true });
@@ -370,37 +371,200 @@ export const acceptRequest= async(req,res)=>{
 }
 
 export const AgencyBookingRequest = async (req, res) => {
-    const { id, bookingData } = req.body;
+    const { id, agencyFormData } = req.body;
+    console.log("agency : =====> ", agencyFormData);
+    console.log("serviceprovider : =====> ", id);
+
     try {
+        // Fetch coordinates for fromLocation and toLocation
+        const [fromCoordinates, toCoordinates] = await Promise.all([
+            fetchCoordinates(agencyFormData.fromlocation),
+            fetchCoordinates(agencyFormData.tolocation)
+        ]);
+
+        // Calculate distance between two sets of coordinates (in kilometers)
+        const distance = calculateDistance(fromCoordinates, toCoordinates);
+        console.log("distance",  distance);
+        try {
+            const serviceProviderId = id; // Replace with the actual service provider ID
+            const category = agencyFormData.shiftingType; // or "city" or "state"
+            //  distance = distance; // Example distance in kilometers
+            const bhk = agencyFormData.houseType; // Example BHK
+            console.log("distance  ",distance);
+            console.log("agencyFormData.shiftingType  ",  agencyFormData.shiftingType);
+            console.log("agencyFormData.shiftingType  ",  agencyFormData.houseType);
+            var price = await fetchPrice(serviceProviderId, category, distance, bhk);
+            console.log("Price:", price);
+        } catch (error) {
+            console.error("Error:", error);
+        }
+
+        async function fetchPrice(serviceProviderId, category, distance, bhk) {
+            try {
+                // Find the document with the specified service provider ID
+                const priceData = await agencyprice.findOne({ service_provider_id: serviceProviderId });
+        
+                if (!priceData) {
+                    throw new Error("Price data not found for the service provider ID");
+                }
+        
+                let price;
+        
+                // Determine the category and calculate the price accordingly
+                switch (category) {
+                    case "Local_House_Shifting":
+                        price = getPriceForLocal(distance, bhk, priceData.Local_House_Shifting);
+                        break;
+                    case "City_House_Shifting":
+                        price = getPriceForCity(distance, bhk, priceData.City_House_Shifting);
+                        break;
+                    case "State_House_Shifting":
+                        price = getPriceForState(distance, bhk, priceData.State_House_Shifting);
+                        break;
+                    default:
+                        throw new Error("Invalid category");
+                }
+        
+                // Determine the price based on the distance
+                if (price === undefined) {
+                    throw new Error(`Price not found for category: ${category} and BHK: ${bhk}`);
+                }
+        
+                return price;
+            } catch (error) {
+                console.error("Error fetching price:", error);
+                throw error;
+            }
+        }
+        function getPriceForLocal(distance, bhk, localPrices) {
+            // Determine the appropriate price based on distance and BHK
+            // Adjust the logic based on your schema structure
+            // Example:
+            if (distance <= 12) {
+                return localPrices.find(entry => entry[bhk].upto12Km)?.[bhk]?.upto12Km;
+            } else if (distance > 12 && distance <= 30) {
+                return localPrices.find(entry => entry[bhk].km13to30)?.[bhk]?.km13to30;
+            } else {
+                return localPrices.find(entry => entry[bhk].above31km)?.[bhk]?.above31km;
+            }
+        }
+        
+        // Helper function to get price for city house shifting
+        function getPriceForCity(distance, bhk, cityPrices) {
+            if (distance <= 100) {
+                return cityPrices.find(entry => entry[bhk]?.upto100Km)?.[bhk]?.upto100Km;
+            } else if (distance > 100 && distance <= 400) {
+                return cityPrices.find(entry => entry[bhk]?.km100to400)?.[bhk]?.km100to400;
+            } else {
+                return cityPrices.find(entry => entry[bhk]?.km400to800)?.[bhk]?.km400to800;
+            }
+        }
+        
+         
+        
+        // Helper function to get price for state house shifting
+        function getPriceForState(distance, bhk, statePrices) {
+            // Similar logic to getPriceForLocal
+            if (distance <= 900) {
+                return statePrices.find(entry => entry[bhk].upto900Km)?.[bhk]?.upto900Km;
+            } else if (distance >  900 && distance <= 1300) {
+                return statePrices.find(entry => entry[bhk].km900to1300)?.[bhk]?.km900to1300;
+            } else {
+                return statePrices.find(entry => entry[bhk].km1300to1700 )?.[bhk]?.km1300to1700 ;
+            }
+        }
+        
         // Save the booking data to the database
         const newBooking = new Agency_Booking({
             serviceProviderId: id,
-            serviceType: bookingData.serviceType,
-            shiftingType: bookingData.shiftingType,
-            fromLocation: bookingData.fromLocation,
-            toLocation: bookingData.toLocation,
-            date: bookingData.date,
+            houseType: agencyFormData.houseType,
+            shiftingType: agencyFormData.shiftingType,
+            fromLocation: agencyFormData.fromlocation,
+            toLocation: agencyFormData.tolocation,
+            distance: distance, // Add distance to the booking object
+            date: agencyFormData.date,
+            customer_id: agencyFormData.customer_id,
+            price:price
         });
-
+        
         await newBooking.save();
 
-        // Respond with a success message or other relevant data
         res.status(201).json({ message: 'Booking request submitted successfully' });
     } catch (error) {
         console.error('Error submitting booking request:', error);
-        // Handle errors and respond with an error message
         res.status(500).json({ error: 'Internal Server Error' });
     }
 }
-export const Booking_DataController=async (req, res) => {
-    try {
-        const bookings = await Agency_Booking.find({serviceProviderId:req.params.provider_id});
-        if(bookings.length>0){
-            
-            res.status(201).json({requestdata:bookings});
 
-        }else{
-            res.status(203).json({message:'data is empty'});
+// Function to fetch coordinates for a given location using geocoding API
+async function fetchCoordinates(location) {
+    const apiKey = "e956c0730db04a47baedbcd836054d57"; // Replace with your actual API key
+    const encodedLocation = encodeURIComponent(location);
+    const apiUrl = `https://api.opencagedata.com/geocode/v1/json?q=${encodedLocation}&key=${apiKey}`;
+
+    try {
+        const response = await axios.get(apiUrl);
+        const { results } = response.data;
+        if (results && results.length > 0) {
+            const { lat, lng } = results[0].geometry;
+            return { latitude: lat, longitude: lng };
+        } else {
+            throw new Error("No results found for the location");
+        }
+    } catch (error) {
+        console.error("Error fetching coordinates:", error);
+        throw error;
+    }
+}   
+
+// Function to calculate distance between two sets of coordinates using Haversine formula
+function calculateDistance(coords1, coords2) {
+    const R = 6371; // Radius of the Earth in kilometers
+    const { latitude: lat1, longitude: lon1 } = coords1;
+    const { latitude: lat2, longitude: lon2 } = coords2;
+
+    const dLat = deg2rad(lat2 - lat1);
+    const dLon = deg2rad(lon2 - lon1);
+
+    const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    const distance = R * c; // Distance in kilometers
+    return distance;
+}
+
+// Function to convert degrees to radians
+function deg2rad(deg) {
+    return deg * (Math.PI / 180);
+}
+
+
+export const Booking_DataController = async (req, res) => {
+    try {
+        const bookings = await Agency_Booking.find({ serviceProviderId: req.params.provider_id });
+        console.log("bookings=>", bookings);
+
+        const bookingDataa = await Promise.all(
+            bookings.map(async (booking) => {
+                const customer = await registration.findOne({ _id: booking.customer_id });
+                console.log("customer", customer.Name);
+                const bookingssData = {
+                    ...booking.toObject(),
+                    "Name": customer.Name
+                }
+                return bookingssData;
+            })
+        );
+        console.log("bookingDataa=>", bookingDataa); 
+
+        if (bookingDataa.length > 0) {
+            res.status(201).json({ requestdata: bookingDataa });
+        } else {
+            res.status(203).json({ message: "Data is Empty" });
         }
     } catch (error) {
         console.error('Error fetching agency bookings:', error);
@@ -409,52 +573,200 @@ export const Booking_DataController=async (req, res) => {
 };
 export const AgencyacceptController=async(req,res)=>{
 console.log("data");
-//const { bookingId } = req.params;
+
 console.log("req  ",req.body);
-    const { bookingId,Status,drivername,vehiclenumber,traveltime } = req.body;
-try {
-    const updatedBooking = await Agency_Booking.findByIdAndUpdate(
-        bookingId,
-        {
-            $set: {
-                Status,
-                drivername,
-                vehiclenumber,
-                traveltime,
+    const { agencydata } = req.body;
+    
+    try {
+        const updatedBooking = await Agency_Booking.findByIdAndUpdate(
+            agencydata.bookingId,
+            {
+                $set: {
+                    Status:agencydata.Status,
+                    drivername:agencydata.drivername,
+                    vehiclenumber:agencydata.vehiclenumber,
+                    traveltime:agencydata.traveltime,
+                },
             },
-        },
-        { new: true }
-        
-    );
-    console.log("updatedata",updatedBooking);
-    return res.json(updatedBooking);
-}catch(error){
-         console.log("error: ",error);
+            { new: true }
+            
+        );
+        console.log("updatedata",updatedBooking);
+        return res.json(updatedBooking);
+    }catch(error){
+            console.log("error: ",error);
     }
 }
-// export const providerpayment=async(req,res)=>{
-//     const {providerData,pathname}=req.body;
-//     try {
-//         const userData=await registration.findOne({_id:providerData.User_id});
-//         const session = await stripeInstance.checkout.sessions.create({
-//             payment_method_types: ['card'],
-//             line_items: [{
-//                 price_data: {
-//                     currency: 'INR',
-//                     product_data: {
-//                         name: userData.Name,
-//                     },
-//                     unit_amount: 50000,
-//                 },
-//                 quantity: 1,
-//             }],
-//             mode: 'payment',
-//             success_url: `http://localhost:3000${pathname}?status=true`,
-//             cancel_url: `http://localhost:3000${pathname}?status=false`
-//         });
-//         res.status(201).json({id: session.id});
-//     } catch (error) {
-//         console.error('Error creating Stripe session:', error);
-//         res.status(500).json({ error: 'Internal Server Error' });
-//     }
-// }
+
+export const acceptedservices = async(req,res)=>{
+    try{
+       const id = req.params.id;
+       var services=await Booking.find();
+       console.log('id : ',id);
+       console.log("services : ",services);
+       const acceptservices = await Promise.all(
+        services.map(async (service) => {
+            const Bookings = await Promise.all(
+                service.BookingData
+                    .filter((booking) => booking.Status === 'Accepted' && booking.Service_provider_id===id)
+                    .map(async (acceptedBooking) => {
+                        console.log('booking ', acceptedBooking);
+                        const userdata = await registration.findOne({ _id: service.Customer_id });
+                        const bookingWithUserData = {
+                            ...acceptedBooking.toObject(),
+                            "Name": userdata.Name
+                        };
+                        return bookingWithUserData;
+                    })
+            );
+            return Bookings;
+        })
+    );
+       const flatAcceptedServices = acceptservices.flat();
+        if(acceptservices.length>0){
+            res.status(201).json({accepteddata:flatAcceptedServices});
+        }
+        else{
+            res.status(203).json({message:'data not available'});
+        }
+    }catch(error){
+       console.log('error ',error);
+       res.status(205).json({error:"Error while fetching request"});
+    }
+}
+
+export const acceptedagencyservices = async(req,res)=>{
+    try{
+       const id = req.params.id;
+       const bookings = await Agency_Booking.find({ serviceProviderId: id,Status:'Accepted' });
+        console.log("bookings=>", bookings);
+        if(bookings.length>0){
+            res.status(201).json({accepteddata:bookings});
+        }else{
+            res.status(203).json({accepteddata:"error"});
+        }
+    }catch(error){
+        console.log("error : ",error);
+        res.status(500).json({error:'error'});
+    }
+}
+
+export const confirmedservices = async(req,res)=>{
+    try{
+        const id = req.params.id;
+       var services=await Booking.find();
+       console.log('id : ',id);
+       console.log("services : ",services);
+       const confirmservices = await Promise.all(
+        services.map(async (service) => {
+            const Bookings = await Promise.all(
+                service.BookingData
+                    .filter((booking) => booking.Status === 'Confirm' && booking.Service_provider_id === id)
+                    .map(async (confirmBooking) => {
+                        console.log('booking ', confirmBooking);
+                        const userdata = await registration.findOne({ _id: service.Customer_id });
+                        const bookingWithUserData = {
+                            ...confirmBooking.toObject(),
+                            "Name": userdata.Name
+                        };
+                        return bookingWithUserData;
+                    })
+            );
+            return Bookings;
+        })
+    );
+       const flatAcceptedServices = confirmservices.flat();
+        if(confirmservices.length>0){
+            res.status(201).json({confirmdata:flatAcceptedServices});
+        }
+        else{
+            res.status(203).json({message:'data not available'});
+        }
+    }catch(error){
+        console.log('error : ',error);
+        res.status(500).json({message:'error'});
+    }
+}
+
+export const confirmedagencyservices = async(req,res)=>{
+    try{
+        const id = req.params.id;
+        const bookings = await Agency_Booking.find({ serviceProviderId: id,Status:'Confirm' });
+        console.log("bookings=>", bookings);
+        if(bookings.length>0){
+            res.status(201).json({accepteddata:bookings});
+        }else{
+            res.status(203).json({accepteddata:"error"});
+        }
+    }catch(error){
+        console.log("error : ",error);
+    }
+}
+
+export const completeBooking = async(req,res)=>{
+    try {
+        const { service } = req.body;
+        console.log('service otp : ', service);
+        const booking = await Booking.findOne({
+            'BookingData._id': service.id
+        });
+
+        console.log('booking1 ----> ', booking);
+
+        let otpMatched = false;
+        let provider_id;
+        let price;
+        for (let i = 0; i < booking.BookingData.length; i++) {
+            console.log("id : ",booking.BookingData[i]._id);
+            console.log("otp : ",booking.BookingData[i].Otp);
+            if (service.id == booking.BookingData[i]._id && service.otp == booking.BookingData[i].Otp) {
+                otpMatched = true;
+                booking.BookingData[i].Otp = 0;
+                booking.BookingData[i].Status = 'Complete';
+                provider_id = booking.BookingData[i].Service_provider_id;
+                price = booking.BookingData[i].TotalPrice;
+                break;
+            }
+        }
+
+        if (otpMatched) {
+            console.log('Booking updated:', booking);
+            await booking.save(); // Save the changes back to the database
+            var provider_data = await serviceprovider.findOne({User_id:provider_id});
+            console.log("provider : ",provider_data);
+            provider_data.Wallet= price - ((price/100)*10);
+            var data=provider_data.Complete_Booking;
+            data=[...data,{['booking_id']:service.id,['Price']:price - ((price/100)*10)}];
+            provider_data.Complete_Booking=data;
+            console.log("provider_data : ",provider_data);
+            await provider_data.save(); // Save the changes back to the database
+            res.status(201).json({message:'services completed'});
+        } else {
+            console.log('OTP not matched or booking not found');
+            res.status(203).json({message:'Wrong Otp'});
+        }
+    } catch (error) {
+        console.log('error ', error);
+        res.status(500).json({ message: error });
+    }
+}
+
+export const providerBankDetailsData = async (req,res)=>{
+    console.log("In providerBankDetails Controller");
+    console.log("==>",req.body);
+    const dataBank = req.body;
+    console.log("==> dataBank",dataBank);
+    try{
+        const providerbankdata = new providerBankDetails({
+            providerId : dataBank.providerId,
+            providerName: dataBank.providerName,
+            bankName: dataBank.bankdata.bankName,
+            accountNumber: dataBank.bankdata.accountNumber,
+        });
+        await providerbankdata.save();
+        res.status(201).json({ message: 'Provider Bank Data submitted successfully' });
+    }catch(err){
+        console.log("Error :", err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+}
