@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer';
 export const mailer=function(email,message,callback){
+        console.log("email : ",email);
         const transporter = nodemailer.createTransport({
         service: "gmail",
         auth: {

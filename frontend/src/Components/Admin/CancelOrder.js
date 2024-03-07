@@ -22,7 +22,7 @@ function CancelOrder() {
 
     return (
         <>
-            <div className=" dataTable">
+            <div className="dataTable">
                 <h3>
                     Customer
                 </h3>
@@ -38,8 +38,8 @@ function CancelOrder() {
                                     <th>Service Name</th>
                                     <th>Service Category</th>
                                     <th>Service Type</th>
-                                    <th>Cancel Date</th>
-                                    <th>Cancel Time</th>
+                                    <th>Booking Date</th>
+                                    <th>Booking Time</th>
                                     <th>Address</th>
                                     <th>Status</th>
                                 </tr>
@@ -64,7 +64,6 @@ function CancelOrder() {
                                             </tr>
                                             </>
                                         );
-
                                     })
                                 }
                                 

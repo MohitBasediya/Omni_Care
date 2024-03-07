@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 var BookingSchema=mongoose.Schema({
     Customer_id:{
-        type:String,
+        type:mongoose.Schema.ObjectId,
         required:true
     },    
     BookingData:[
@@ -43,7 +43,7 @@ var BookingSchema=mongoose.Schema({
                 required:true
             },
             Service_provider_id:{
-                type:String,
+                type:mongoose.Schema.ObjectId,
                 default:null
             },
             Status:{

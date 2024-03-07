@@ -11,6 +11,9 @@ var payment = mongoose.Schema({
     },
     Trannsaction_id:{
         type:String
+    },
+    Booking_id:{
+        type:String
     }
 });
 export const payment_model = mongoose.model('Payment',payment);

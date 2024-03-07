@@ -15,14 +15,11 @@ function Agency_Profile() {
     const id = location.state.id;
     const name = location.state.name;
     const img = location.state.img;
-    console.log("Id===>",id);
-    console.log("Name===>",name);
     const [areaType,setAreaType] = useState(false);
     const [serviceType,setServiceType] = useState(false);
     const [fromLocation,setFromLocation] = useState(false);
     const [toLocation,setToLocation] = useState(false);
     const [date,setDate] = useState(false);
-
     const [agencyData, setAgencyData] = useState([]);
     const [userRole, setUserRole] = useState(); 
     const [agencyFormData,setAgencyFormData] = useState({});
@@ -39,20 +36,18 @@ function Agency_Profile() {
     },[]);
 
     useEffect(()=>{
+        window.scrollTo(0,0);
         const getLogInUserData = async()=>{
-            console.log('first');
             var cookie_token = Cookie.get('Login_Jwt_token');
-            console.log("LogIn_Usertoken ==>",cookie_token);
-
             if(cookie_token){
                 try{
-                    console.log("You are in try block");
                     var result = await axios.post(requestedURL + '/awt_login',{token : cookie_token});
                     if(result.status==201){
-                        console.log("Result Found==>",result);
-                        console.log("====>",result.data.payload.user.role);
                         if(result.data.payload.user.role==='Service Provider'){
-                            setUserRole(result.data.payload.user.data[0]._id);
+                            setUserRole(result.data.data[0]._id);
+                        }
+                        else{
+                            setAgencyFormData({...agencyFormData,['customer_id']:result.data.data._id})
                         }
                     }else{
                         console.log("Status is not 201");
@@ -60,6 +55,10 @@ function Agency_Profile() {
 
                 }catch(err){
                     console.log("Error While Finding Authorized User",err);
+                    Swal.fire({
+                        icon:'error',
+                        text:'Error while dealing with backend'
+                    })
                 }          
 
             }else{
@@ -78,22 +77,18 @@ function Agency_Profile() {
 
     const validateField  = (name,value)=>{
         switch(name){
-
-            case 'service' :{
-                console.log("service in validation",value);
+            case 'houseType' :{
                 if(value === ''){
-                    document.getElementById("service").style.color = "red";
+                    document.getElementById("houseType").style.color = "red";
                     document.getElementById("spanService").innerHTML = "Service Area Type is Required"
                     setAreaType(false);
                 }else{
-                    document.getElementById("service").style.color = "green";
+                    document.getElementById("houseType").style.color = "green";
                     setAreaType(true);
                 }
             }
             break;
-
             case 'shiftingType' :{
-                console.log("shiftingType in validation",value);
                 if(value === ''){
                     document.getElementById("shiftingType").style.color = "red";
                     document.getElementById("spanServicee").innerHTML = "Service Type is Required";
@@ -104,9 +99,7 @@ function Agency_Profile() {
                 }
             }
             break;
-
             case 'fromlocation' :{
-                console.log("fromlocation in validation",value);
                 if(value.trim() === ''){
                     document.getElementById("fromlocation").style.color = "red";
                     document.getElementById("spanFromlocation").innerHTML = "fromlocation is Required";
@@ -117,9 +110,7 @@ function Agency_Profile() {
                 }
             }
             break;
-
             case 'tolocation' :{
-                console.log("tolocation in validation",value);
                 if(value.trim() === ''){
                     document.getElementById("tolocation").style.color = "red";
                     document.getElementById("spanTolocation").innerHTML = "tolocation is Required";
@@ -130,9 +121,7 @@ function Agency_Profile() {
                 }
             }
             break;
-
             case 'date' :{
-                console.log("date in validation",value);
                 if(value === ''){
                     document.getElementById("date").style.color = "red";
                     document.getElementById("spanDate").innerHTML = "date is Required";
@@ -150,18 +139,8 @@ function Agency_Profile() {
         e.preventDefault();
         if(areaType && serviceType && fromLocation && toLocation && date)
         {
-        const bookingData = {
-            serviceType: e.target.service.value,
-            shiftingType: e.target.shiftingType.value,
-            fromLocation: e.target.fromlocation.value,
-            toLocation: e.target.tolocation.value,
-            date: e.target.date.value,
-        };
         try {
-            const response = await axios.post(requestedURLForServiceProvider + '/submitBookingRequest', {
-                id: id,
-                bookingData: bookingData,
-            });
+            const response = await axios.post(requestedURLForServiceProvider + '/submitBookingRequest', {id,agencyFormData});
             if(response.status === 201){
                 Swal.fire("Data Added");
                 e.target.reset();
@@ -192,14 +171,14 @@ function Agency_Profile() {
                             <div className='w-100 px-3 py-2 bg-yellow border-0 rounded-3' style={{ background: '#FFC36A' }}>
                                 <h4>Booking Form</h4>
                                 <form method='post' className="w-100 px-2" onSubmit={handleBookingSubmit}>
-                                        <select className="form-control form-select my-3 rounded-1 border-0" id="service" onChange={handleInput} name="service" placeholder="Select Service">
+                                        <select className="form-control form-select my-3 rounded-1 border-0" id="shiftingType" onChange={handleInput} name="shiftingType" placeholder="Select Service">
                                             <option value="">Select...</option>
                                             <option value="Local">Local Area</option>
                                             <option value="City">City Area</option>
                                             <option value="State">State Area</option>
                                         </select>
                                         <span id='spanService'></span>
-                                        <select className="form-control form-select my-3 rounded-1 border-0" id="shiftingType" onChange={handleInput} name="shiftingType" placeholder="Household Shifting Type">
+                                        <select className="form-control form-select my-3 rounded-1 border-0" id="houseType" onChange={handleInput} name="houseType" placeholder="Household Shifting Type">
                                             <option value="">Select...</option>
                                             <option value="1BHK">1 BHK</option>
                                             <option value="2BHK">2 BHK</option>
@@ -212,6 +191,8 @@ function Agency_Profile() {
                                         <span id='spanFromlocation'></span>
                                         <input type="text" className="form-control my-3 rounded-1 border-0" id="tolocation" onChange={handleInput} name="tolocation" placeholder="To Location" />
                                         <span id='spanTolocation'></span>
+                                        <input type="text" className="form-control my-3 rounded-1 border-0" id="fromcity" onChange={handleInput} name="fromcity" placeholder="fromCity" />
+                                        <span id='spanfromcity'></span>                                        
                                         <input type="date" className="form-control my-3 rounded-1 border-0" id="date" name="date" onChange={handleInput} placeholder="Select Date" />
                                         <span id='spanDate'></span>
                                         <div className="d-flex justify-content-center">
@@ -234,12 +215,10 @@ function Agency_Profile() {
 
                     {/* div for content start */}
                     <div id="divforfrom" className="col-md-8">
-                    <center className="mt-5">
-                <h3>{name}<br />
-                Pakers and Movers House Shifting Services</h3>
-            </center>
-                        <div className='p-1' style={{ background: '#F9F5F4' }}>           
-
+                        <center className="mt-5">
+                            <h3>{name}<br />Pakers and Movers House Shifting Services</h3>
+                        </center>
+                        <div className='p-1' style={{ background: '#F9F5F4' }}>      
                             <p>
                                 House shifting services can be recruited for household products shifting from one place/city to another. Assuming you are searching for top notch and financially savvy home shifting services close to you then Agarwal Packers and Movers can help you altogether.
                             </p>
@@ -258,7 +237,6 @@ function Agency_Profile() {
         {/* End of hero Section  */}
 
         <section className="container">
-
             <center>
                 <h2>House Shifting Services Charges</h2>
                 <p className='p-3 '>If you are searching for the best "house shifting near me" then you are in the right place. Agarwal Packers and Movers offers the best household shifting charges near your preferred local location and across India.</p>
@@ -432,7 +410,6 @@ function Agency_Profile() {
             {/* </div> */}
         </section>
 
-
         <section className="container">
             <center>
                 <h2>Domestic House Shifting Services Charges</h2>
@@ -594,25 +571,20 @@ function Agency_Profile() {
                                     </React.Fragment>
                                 ))
                             ))
-                        }
-                                
+                        }                                
                         </tr>
                     </tbody>
-
                 </table>
             </div>
-            {/* </div> */}
         </section>
 
-
-
-        <section className="container">
+        {/* <section className="container">
             <center>
                 <h2>State House Shifting Services Charges</h2>
             </center>
             <div className='col-12 mt-4 p-2 table-responsive'>
                 <h4>State Shifting Services Charges</h4>
-                {/* <div className='col-12 p-2 w-80 table-responsive'> */}
+                {/* <div className='col-12 p-2 w-80 table-responsive'> 
                 <table className="table w-100 ">
                     <thead style={{ background: '#6B6565' }}>
                         <tr>
@@ -680,8 +652,7 @@ function Agency_Profile() {
                                     </React.Fragment>
                                 ))
                             ))
-                        }
-             
+                        }             
                         </tr>
 
 
@@ -772,14 +743,12 @@ function Agency_Profile() {
                                     </React.Fragment>
                                 ))
                             ))
-                        }
-                                
+                        }                                
                         </tr>
                     </tbody>
-
                 </table>
             </div>
-        </section>
+        </section> */}
     </>);
 }
 

@@ -109,19 +109,17 @@ function Electrician_Registration() {
 				var result = await axios.post(requestedURLForServiceProvider + '/providerdata');
 				console.log("Result : ",result);
 				if(result.status==201){
-					Swal.fire("Data Added");
-	
-					Cookie.set('Login_Jwt_token',result.data.token,{expires:'7d'});
+					Swal.fire("Data Added");	
+					Cookie.set('Login_Jwt_token',result.data.token,{expires:7});
 					dispatch(userData(result.data.data));
 					if(result.data.token){
 						navigate('/Service_provider_profile');
 					}
-	
 				}
 				else if(result.status==500){
 					Swal.fire('Error when add data');
 				}
-				else if(result.status==500){
+				else if(result.status==203){
 					Swal.fire('You Enter Wrong Otp');   
 				}
 	
@@ -171,7 +169,7 @@ function Electrician_Registration() {
 			const params = new URLSearchParams(location.search);
 			const status = params.get('status');
 			console.log('status : ',status);
-			if(status==="true"){
+			if(status=="true"){
 				console.log("providerdata : ",providerData);
                 submitData2();
 			}else{
@@ -242,20 +240,21 @@ function Electrician_Registration() {
 									<h1 className="h1">Electrician Registration</h1>
 									<div>
 										<input type="text" className="form-control mb-3" name="Address" id='address' placeholder="Enter Address" onChange={(e)=>{handleInput(e)}}/>
-										<i class="flaticon-envelope"></i>
 										<span id='Address'></span>
 									</div>
 									<div>
 										<select type="text"  className="form-control mb-3" name="State" id="state" onChange={(e) => { print_city(e, 'city') }}></select>
-										<i class="flaticon-padlock"></i>
 									</div>
 									<div >
 										<select type="text" className="form-control mb-3"  name="City" id="city" onChange={(e)=>{handleInput(e)}}></select>
-										<i class="flaticon-envelope"></i>
 									</div>
 									<div >
+										<label>Aadhar Card Image</label>
 										<input type="file" className="form-control mb-3" name="aadharimg" placeholder="Adhaar Image" onChange={(e)=>{handleInput(e)}}/>
-										<i class="flaticon-envelope"></i>
+									</div>
+									<div>
+										<label>Profile Image</label>
+										<input type="file" className="form-control mb-3" name="profileimg" placeholder="Adhaar Image" onChange={(e)=>{handleInput(e)}}/>
 									</div>
 								</div>
 

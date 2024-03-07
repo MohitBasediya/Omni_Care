@@ -1,11 +1,15 @@
 import mongoose from "mongoose";
 
 const Agencybooking_Schema = new mongoose.Schema({
+    customer_id:{
+        type:mongoose.Schema.Types.ObjectId,
+        required:true
+    },
     serviceProviderId: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
     },
-    serviceType: {
+    houseType: {
         type: String,
         required: true,
     },
@@ -26,7 +30,8 @@ const Agencybooking_Schema = new mongoose.Schema({
         required: true,
     },
     Status:{
-        type:String
+        type:String,
+        default:'Pending' 
     },
     drivername:{
         type:String
@@ -35,6 +40,12 @@ const Agencybooking_Schema = new mongoose.Schema({
         type:String
     },
     traveltime:{
+        type:String
+    },
+    price:{
+        type:Number
+    },
+    distance:{
         type:String
     }
     

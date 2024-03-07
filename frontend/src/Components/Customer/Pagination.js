@@ -1,4 +1,4 @@
-import './customer_services.css'
+import './customer_services.css';
 function Pagination({totalPosts,postPerPage,currentPage,setCurrentPage}){
     let page=[];
     for(let i=1;i<=Math.ceil(totalPosts/postPerPage);i++){
@@ -18,9 +18,7 @@ function Pagination({totalPosts,postPerPage,currentPage,setCurrentPage}){
                                 </li>
                             )
                         })
-                    }
-                    
-                    
+                    }                  
                 </ul>
             </nav>
         </>

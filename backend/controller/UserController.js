@@ -18,7 +18,7 @@ var otp;
 var user={};
 const { STRIPE_SECRET_KEY } = process.env;
 const stripeInstance = stripe(STRIPE_SECRET_KEY);
-
+var u_data,b_data,session;
 export const VerifyEmail = async (req, res) => {
     user=req.body;
     try {
@@ -71,7 +71,6 @@ export const VerifyOtp=async(req,res)=>{
                 role:'Customer'
             }
             var token=jwt.sign(payload,SECRET_KEY,expiryTime);
-            console.log('token ',token);
              res.status(201).json({token:token,userdata:data,role:'Customer'}); 
           }else{
             console.log(data);     
@@ -100,38 +99,27 @@ export const loginController=async(request,response)=>{
           const exist = await registration.findOne({
             Email: email,Status:'Active'
           });
-            console.log(exist);
+            // console.log(exist);
             if (exist) {
               console.log("exist");
                 const pass = await bcrypt.compare(password, exist.Password);
                 if (pass) {
                     var user={};
                     console.log('pass');
-                    if(exist.User_Role==='Service Provider'){
-                        var service = await serviceprovider.findOne({User_id:exist._id});
-                        user={
-                           data:[exist,service],
-                           role:'Service Provider'
-                        }
-                    }
-                    else{
-                         user={
-                            data:exist,
-                            role:"Customer"
-                        }
-                    }
-                    console.log('user : ',user);
-                    payload.user = user;                    
-                    console.log("payload ",payload);
+                    if(exist.User_Role==='Service Provider')
+                        user={data:exist,role:"Service Provider"}
+                    else
+                        user={data:exist,role:"Customer"}
+                    console.log("user in login controller : ",user);
+                    payload.user = user;    
+                    console.log("pyaload in login controller : ",payload);                
                     token = jwt.sign(payload, SECRET_KEY, expiryTime);
-                    //console.log(token);
                     response.status(201).json({ message:'login success',token:token,exist:user.data,role:user.role});
                 } else {                   
                     response.status(203).json({message:'Password not matched'});
                 }
             }
             else {
-                console.log("else");
                 response.status(202).json({message:'email not matched'});
             }
         
@@ -141,27 +129,33 @@ export const loginController=async(request,response)=>{
     }
 }
 
-export const awthenticateController=async(req,res,next)=>{
+export const awthenticateController=async(req,res)=>{
     console.log('authenticate');
-   var {token}=req.body;
-    if(!token){
-       res.status(205).json({ message:'token is empyt'});    
-    }else{
-        jwt.verify(token,SECRET_KEY,(err, payload)=>{  
-        req.payload = payload;  
-            if(err)
+     var {token}=req.body;
+        jwt.verify(token,SECRET_KEY,async(err, payload)=>{  
+            if(err){
              console.log('err : ',err);
-            else{
-            next();   
+             res.status(203).json({error :'Error while checking token'});
+            }else{
+                if(payload.user.role==='Service Provider'){
+                    console.log("payload ",payload.user.data);
+                    const data1=payload.user.data;
+                    console.log('65af430dae58000f2333ceb8 ',data1._id);
+                    var provider = await serviceprovider.findOne({User_id:data1._id});
+                    console.log("provider : ",provider);
+                    res.status(201).json({data:[payload.user.data,provider],role:'Service Provider'});
+                }else{
+                    console.log("payload in customer ",payload.user.data);
+                    const data1=payload.user.data;
+                    console.log('data 1 ',data1);
+                   var customer=await registration.findOne({_id:data1._id});
+                   console.log("customer : ",customer);
+                   res.status(201).json({message: 'User authorized', data:customer,role:'Customer'});   
+                }
             }      
       });
-    }
 }
-export const authorizeUser = (request,response) => {
-    console.log('authorized');
-    var payload=request.payload;
-    response.status(201).json({ message: 'User authorized', payload: payload });   
-}
+
 
 export const updateUserController = async (request,response)=>{
     try{
@@ -330,7 +324,7 @@ export const getCustomerServices = async(req,res)=>{
         const id=req.params.id;
         console.log("customer id : ",id);
         var bookingData=await Booking.findOne({Customer_id:id});
-        console.log("bookingData ",bookingData.BookingData);
+        console.log("bookingData ",bookingData);
         
         if(bookingData.BookingData.length>0){
             var Customer_Booking=[];
@@ -386,54 +380,46 @@ export const cancelBooking = async(req,res)=>{
 export const getCustomerCancelBookings = async(req,res)=>{
     try{
         const id = req.params.id;
-        console.log("Id==>",id);
         var bookingData = await Booking.findOne({Customer_id:id});
-        console.log("bookingData =>",bookingData.BookingData);
+        var cancelBookingsData=[];
         bookingData.BookingData
         .filter((cb)=>cb.Status == 'Cancel')
         .map(async (allcancelBookings)=>{
-            console.log("allcancelBookings =>",allcancelBookings);
-            const cancelBookingsData = [allcancelBookings];
-
-            if(cancelBookingsData.length>0){
-                console.log("In if.....");
-                res.status(201).json({cancelBookings : cancelBookingsData});
-            }else{
-                res.status(201).json({error:"Error while fetching request"});
-            }
-        })
+             cancelBookingsData = [...cancelBookingsData,allcancelBookings];
+        });
+        if(cancelBookingsData.length>0){
+            res.status(201).json({cancelBookings : cancelBookingsData});
+        }else{
+            res.status(203).json({error:"Error while fetching request"});
+        }
     }catch(err){
         console.log("error",err);
         res.status(500).json({message:'Error while fetching Data'});
     }
 }
 
-export const AddReview=async(req , res)=>{
-
+export const AddReview=async(req,res)=>{
     try{
        const review=req.body.review;
        const userId=req.body.userId;
-        console.log("Add Review section "+review);
-        console.log("Add Review section "+userId);
         
         var result = await reviews.create({
             User_Id:userId,
             Text_Review:review,
         });
-        console.log(result);
     if(result){
         res.status(201).json({result : result});
     }else{
-        res.status(500).json({message:'Internal Server Error When Adding Review'});
+        res.status(203).json({message:'Internal Server Error When Adding Review'});
     }  
     }
     catch(error)
     {
-        console.log(" Error while inserting review"+error)
+        console.log(" Error while inserting review"+error);
+        res.status(500).json({message:error});
     }
-
 };
-let u_data,b_data,session;
+
 export const bookingPayment = async(req,res)=>{
     u_data = req.body.userData;
     b_data = req.body.Booking;
@@ -447,7 +433,7 @@ export const bookingPayment = async(req,res)=>{
                     product_data: {
                         name: u_data.Name,
                     },
-                    unit_amount: b_data.TotalPrice*10,
+                    unit_amount: (b_data.TotalPrice*100),
                 },
                 quantity: 1,
             }],
@@ -463,11 +449,13 @@ export const bookingPayment = async(req,res)=>{
 }
 
 export const confirmBooking = async(req,res)=>{
-    try{ 
-        console.log("confirm :");
+    try{    
+        console.log("confirm :",b_data,"\n u_data ",u_data,"session : ",session);
+        var sent = true;
+        var sent2 = true;
         var otp1=randomstring.generate({
             length:4,
-            charset:'numeric',
+            charset:'numeric'
           });
         var update=await Booking.findOneAndUpdate(
             { 'BookingData._id': b_data._id },
@@ -478,40 +466,78 @@ export const confirmBooking = async(req,res)=>{
                 }
             },
             { new: true });
-        if(update.acknowledged){
+        if(update){
             console.log("update : ",update);
-            var provider=await Booking.findOne({'BookingData._id': b_data._id});
-            var Email =await registration.findOne({_id:provider.Service_provider_id},{Email:1});
+           var provider =await registration.findOne({_id:b_data.Service_provider_id});
            var message1=`Booking of ${u_data.Name} is confirmed and you will go to provide ${provider.ServiceName} on ${provider.Date} Thank You`
-            mailer(Email,message1,(info)=>{
+            mailer(provider.Email,message1,(info)=>{
                 if(info){
-                    sent=true
+                    sent=true;
                     console.log('request sent successfully');
-                }
+                }else{ sent=false}
             });
-            var message2=`Booking of ${u_data.Name} is confirmed and your otp is ${otp1} you will provide this otp to Service Provider when service complete Thank You`
+            var message2=`Booking of ${u_data.Name} is confirmed and your otp is ${otp1} you will provide this otp to Service Provider when service complete Thank You`;
+            console.log("u_data : ",u_data);
             mailer(u_data.Email,message2,(info)=>{
                 if(info){
-                    sent=true
+                    sent2=true
                     console.log('request sent successfully');
-                }
+                }else { sent2=false }
             });
-            if(sent){
+            if(sent && sent2){
                 var date = new Date().getDate() + '-' + new Date().getMonth() + '-' + new Date().getFullYear();
                 var obj={
                     User_id:u_data._id,
                     Amount:b_data.TotalPrice,
                     Date:date,
-                    Transaction_id:session.id
+                    Transaction_id:session.id,
+                    Booking_id:b_data._id
                 }
                 var data=await payment_model.create(obj);
+                console.log("data ",data);
+                res.status(201).json({messsgae:'Booking confirmed',billdata:{...b_data,...data}});
             }
-            res.status(201).json({messsgae:'Booking confirmed',billdata:{...b_data,...data}});
         }else{
             res.status(203).json({message:'error while confirm booking'});
         }
     }catch(error){
         console.log("error ",error);
         res.status(500).json({messsage:'error'});
+    }
+}
+
+export const GetBookingController = async(req,res)=>{
+    console.log("GetBookingControoler");
+    try{
+        const id=req.params.id;
+        console.log("customer id : ",id);
+        var bookingData=await Agency_Booking.find({Customer_id:id});
+        console.log("Agency bookingData ",bookingData);
+        res.status(201).json({message:"agency",bookingData:bookingData});
+    }catch(error){
+        console.log("error  ",error);
+        res.status(500).json({message:error});  
+    }
+}
+
+export const getAllocatedProvider = async(req,res)=>{
+    try{
+       const id = req.params.id;
+       var service_provider=[];
+       var data = await Booking.findOne({Customer_id:id},{BookingData:1});
+       const booking = data.BookingData;
+       console.log("booking : --------> ",booking);
+       for(var i=0;i<booking.length;i++){
+          if(booking[i].Service_provider_id){
+            console.log("provider : ------> ",booking[i].Service_provider_id);
+           var provider = await serviceprovider.findOne({User_id:booking[i].Service_provider_id},{Service_type:1,ProfileImg:1,_id:0});
+           var provider_name = await registration.findOne({_id:booking[i].Service_provider_id},{Name:1,Email:1,Contact_No:1,_id:0});
+          }
+          service_provider = [...service_provider,{...provider_name.toObject(),...provider.toObject()}];
+       }
+       res.status(201).json({providerData:service_provider});
+    }catch(error){
+        console.log("error : ",error);
+        res.status(500).json({message:error});
     }
 }

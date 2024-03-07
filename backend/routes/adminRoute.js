@@ -2,7 +2,8 @@ import express from "express";
 import {addServiceType,getServiceType,addServices,AdminloginController,
 AdminawthenticateController,changePassword,checkOtp,getOtp,updateServiceController,
 AdminauthorizeUser,ShowService,ShowCustomer,ShowServiceProvider,deleteServiceController,
-UpdateProviderStatus,getAllBookingData,getAllCancelBookingData,AdminReview,UserReview} from '../controller/adminController.js';
+UpdateProviderStatus,getAllBookingData,getAllCancelBookingData,AdminReview,UserReview,
+CardData,providerPayment,providerPaymentDataSubmit,providerPaymentRequest} from '../controller/adminController.js';
 import { upload,upload2} from "../middleware/upload.js";
 
 var router=express.Router();
@@ -25,4 +26,8 @@ router.get('/allbooking',getAllBookingData);
 router.get('/allcancelbooking',getAllCancelBookingData);
 router.get("/UserReview",AdminReview);
 router.post("/updatReviewstatus",UserReview,AdminReview);
+router.get('/getcard_data',CardData);
+router.get('/allpaymentdata',providerPaymentRequest);
+router.post("/payment",providerPayment);
+router.post("/submitpaymentdata",providerPaymentDataSubmit);
 export default router;

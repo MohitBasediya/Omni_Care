@@ -22,7 +22,6 @@ function Customer_Services() {
     const [initialtype, setSelectedServiceType] = useState('');
     const [status, setState] = useState(false);
     const [bookcategory,setBookCategory] = useState('');
-    // Add this state declaration at the beginning of your component
     const [cartItems, setCartItems] = useState([]);
 
     const lastPostIndex = currentPage * postPerPage;
@@ -51,9 +50,7 @@ function Customer_Services() {
                 // If the condition is true, set the current posts to Cookdata
                 filteredServices = result.data.Cookdata;
                 setState(true);
-                console.log('true');
             } else {
-                console.log('false');
                 // Otherwise, filter services based on the selected category
                 filteredServices = result.data.services.filter(service => service.Service_type === initialtypeUse);
             }
@@ -97,48 +94,41 @@ function Customer_Services() {
         }
         fetchData();
     }, [selectedCategory,initialtype,location.state.Category,firstPostIndex,lastPostIndex]);
-
     const addCart = (selectedService) => {
-        // Check if the service is already in the cart
-        var category=bookcategory;
-        if(!category.includes(selectedCategory)){
-             console.log('booking Category : ',bookcategory);
-            category+=selectedCategory+' ';
+        var category = bookcategory;
+        if (!category.includes(selectedCategory)) {
+            category += selectedCategory + ' ';
             setBookCategory(category);
         }
-        selectedService.ServicePrice=selectedService.ServicePrice + ((selectedService.ServicePrice/100) *10);
-        const isServiceInCart = cartItems.find(item => item.ServiceName === selectedService.ServiceName);
 
+        const updatedService = { ...selectedService, ServicePrice: selectedService.ServicePrice + ((selectedService.ServicePrice / 100) * 10) };    
+        const isServiceInCart = cartItems.find(item => item.ServiceName === updatedService.ServiceName);    
         if (isServiceInCart) {
-            // If the service is already in the cart, update the quantit
-            Swal.fire({icon:'error',text:'This service is aready added in cart'})
+            Swal.fire({ icon: 'error', text: 'This service is already added in the cart' })
         } else {
-            // If the service is not in the cart, add it with quantity 1
-            setCartItems(prevCart => [...prevCart, {...selectedService,Quantity:1}]);
+            // Add the updated service to the cart
+            setCartItems(prevCart => [...prevCart, { ...updatedService, Quantity: 1 }]);
         }
-    };
+    };    
     
     const removecartitem=(index)=>{
         var cart=[...cartItems];
         cart.splice(index,1);
         setCartItems([...cart]);
     }
+
     const booking=async(e)=>{
-        e.preventDefault();
+     e.preventDefault();
       var cookie_token= Cookie.get('Login_Jwt_token');
        if(cookie_token){
-        console.log('category : ',bookcategory);
          try{
             var result = await axios.post(requestedURL+'/awt_login',{token:cookie_token});                                     
              if(result.status==201){
-                dispatch(userData(result.data.payload.user.data));
-                if(result.data.payload.user.role === 'Service Provider'){
-                  console.log('customer : ',result.data.payload);
-                  console.log('initial type ',initialtype);  
+                dispatch(userData(result.data.data));
+                if(result.data.role === 'Service Provider'){
                   navigate('/booking',{state:{serviceData:cartItems,serviceType:initialtype,serviceCategory:bookcategory}});
                 }
                 else{
-                  console.log('customer : ',result.data.payload);
                   navigate('/booking',{state:{serviceData:cartItems,serviceType:initialtype,serviceCategory:bookcategory}});
                 }
              }
@@ -148,6 +138,7 @@ function Customer_Services() {
              }
          }catch(err){
              console.log("Error while dealing with login in login component",err);
+             Swal.fire("Error while dealing with backend");
          }                
        }
        else{
@@ -161,8 +152,7 @@ function Customer_Services() {
                 <h2 style={{ zIndex: '1' }}>{initialtype}</h2>
                 <p style={{ zIndex: '1' }}>Home <i className="fa fa-arrow-right fw-light" aria-hidden="true"></i>{initialtype}</p>
             </section>
-            <section id='services_card '>
-                
+            <section id='services_card '>               
                 <div className='container pt-2'>
                     <div className='w-100 py-2 bg-yellow'>
                      <h3 className='text-center'>{initialtype} Services</h3>
@@ -341,7 +331,7 @@ function Customer_Services() {
                             </div>
                             <div className='w-100 mt-3 p-2' style={{ background: 'white', boxShadow: '0 0 2px rgba(0,0,0,0.3)' }}>
                                 <div className='p-2 w-100 d-flex justify-content-between align-items-center'>
-                                    <h5 className='fw-bold'>Add To Cart</h5>
+                                    <h5 className='fw-bold'> Cart Items</h5>
                                     <h5 className='fw-bold'><i className='fa fa-cart-shopping'></i> {cartItems.length}</h5>
                                 </div>
                                 <div className='card'>

@@ -6,17 +6,17 @@ export default function CommunitySection() {
     return (
         <section id='community'>
         <div className='container-fluid' style={{ backgroundColor: "black" }}>
-            <div className='row text-light'>
+            <div className='row text-light justify-content-between m-3'>
                 <div className='handclass col-lg-4 p-5 ms-2 flex-column position-relative'>
                     <div className='w-auto'>
                         <h2 className='waysH2 ms-4 text-light'>We <span className="highlight-text">BUILD</span><br /> Community<br /></h2>
-                        <img src={HandFold} alt="" className="community-hands-image" />
+                        <img src={HandFold} alt="" className="community-hands-image mb-5 " />
                     </div>
-                    <div className='mt-5' style={{paddingTop:'30px'}}>
-                        <img style={{ width: "100%" }} src={services1} />
+                    <div className='mt-5' style={{paddingTop:'30px', zIndex:'10'}}>
+                        <img style={{ width: "100%" , marginTop:'3rem'}} src={services1}   />
                     </div>
                 </div>
-                <div className='col-lg-7 col-md-12 communityBack ms-4'>
+                <div className='col-lg-7 col-md-12 communityBack ms-4 text-light'>
                     <h2 className='text-light'>Empowering Service Providers: Your Skills, Your Opportunities <big>-</big><br />All at Your Fingertips</h2>
                     <a href="/visit-vous" className="large-link w-inline-block py-2">
                         <div className="link-text-block">Unlock Opportunities</div>
